@@ -1,0 +1,37 @@
+query TestQuery {
+  rateLimit {
+    limit
+    cost
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+    repositories(first: 10, orderBy: { field: STARGAZERS, direction: DESC }) {
+      nodes {
+        name
+        url
+        stargazerCount
+        stargazers(first: 10) {
+          nodes {
+            name
+            login
+          }
+        }
+        issues(first: 5) {
+          totalCount
+          nodes {
+            id
+            title
+            url
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+      totalDiskUsage
+    }
+  }
+}

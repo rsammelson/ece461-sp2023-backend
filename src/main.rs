@@ -40,6 +40,8 @@ where
         .unwrap()
         .as_secs();
 
+    api::query_test().await?;
+
     let (weights, urls, test_mode) = input::cli::get_inputs(args.into_iter())?;
 
     let metrics = Arc::new(Metrics::all());
