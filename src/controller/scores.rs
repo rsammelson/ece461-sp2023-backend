@@ -1,6 +1,27 @@
 use std::fmt::Display;
 
 #[derive(Debug)]
+/// A struct to represent a variable number of scores
+/// ```
+/// use backend::controller::{Score, Scores};
+/// let result = Scores {
+///     name: "example_name".to_string(),
+///     scores: vec![
+///         Score {
+///             metric: "Field 1".to_string(),
+///             score: 1.1,
+///         },
+///         Score {
+///             metric: "Field 2".to_string(),
+///             score: 0.3,
+///         },
+///     ],
+/// };
+/// assert_eq!(
+///     format!("{}", result),
+///     r#"{"example_name": {"Field 1": 1.1, "Field 2": 0.3}}"#
+/// );
+/// ```
 pub struct Scores {
     pub name: String,
     pub scores: Vec<Score>,
@@ -8,7 +29,7 @@ pub struct Scores {
 
 impl Display for Scores {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{{\"{}\": [", self.name)?;
+        write!(f, r#"{{"{}": {{"#, self.name)?;
 
         let mut scores = self.scores.iter();
         if let Some(first) = scores.next() {
@@ -18,7 +39,7 @@ impl Display for Scores {
             write!(f, ", {score}")?;
         }
 
-        write!(f, "]}}")?;
+        write!(f, "}}}}")?;
         Ok(())
     }
 }
@@ -31,6 +52,6 @@ pub struct Score {
 
 impl Display for Score {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "\"{}\": {}", self.metric, self.score)
+        write!(f, r#""{}": {}"#, self.metric, self.score)
     }
 }

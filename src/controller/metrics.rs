@@ -2,6 +2,10 @@ use std::ops::Deref;
 
 use crate::controller::*;
 
+/// An enum that is used to tell `run_metrics()` what to run
+///
+/// For each added scoring algorithm, add a new variant that simply
+/// contains the unit struct created to implement the `Scorer` trait
 pub enum Metric {
     CountCommits(count_commits::CountCommits),
     CountCommits2(count_commits::CountCommits2),

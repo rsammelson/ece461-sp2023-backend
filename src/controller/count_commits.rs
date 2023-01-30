@@ -1,5 +1,6 @@
 use crate::controller::*;
 
+/// This is just an example of how to write a metric scoring algorithm
 pub struct CountCommits();
 
 #[async_trait]
