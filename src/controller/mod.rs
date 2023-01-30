@@ -1,5 +1,8 @@
 mod count_commits;
 
+mod scores;
+use scores::{Score, Scores};
+
 pub mod metrics;
 pub use metrics::Metrics;
 
@@ -11,18 +14,6 @@ use thiserror::Error;
 #[async_trait]
 trait Scorer {
     async fn score<P: AsRef<Path> + Send>(&self, path: P, url: &str) -> Score;
-}
-
-#[derive(Debug)]
-pub struct Scores {
-    pub name: String,
-    pub scores: Vec<Score>,
-}
-
-#[derive(Debug)]
-pub struct Score {
-    pub metric: String,
-    pub score: f64,
 }
 
 #[derive(Debug, Error)]
