@@ -8,16 +8,20 @@ use crate::controller::*;
 /// contains the unit struct created to implement the `Scorer` trait
 pub enum Metric {
     CountCommits(count_commits::CountCommits),
-    CountCommits2(count_commits::CountCommits2),
+    BusFactor(bus_factor::BusFactor),
 }
 
 #[async_trait]
 impl Scorer for Metric {
-    async fn score<P: AsRef<Path> + Send>(&self, path: P, url: &str) -> Score {
+    async fn score<P: AsRef<Path> + Send>(
+        &self,
+        path: P,
+        url: &str,
+    ) -> Result<Score, Box<dyn Error>> {
         use Metric::*;
         match self {
             CountCommits(unit) => unit.score(path, url).await,
-            CountCommits2(unit) => unit.score(path, url).await,
+            BusFactor(unit) => unit.score(path, url).await,
         }
     }
 }
@@ -28,7 +32,7 @@ impl FromStr for Metric {
         use Metric::*;
         match s {
             "CountCommits" => Ok(CountCommits(count_commits::CountCommits())),
-            "CountCommits2" => Ok(CountCommits2(count_commits::CountCommits2())),
+            "BusFactor" => Ok(BusFactor(bus_factor::BusFactor())),
             _ => Err(ControllerError::MetricParseError(s.to_string())),
         }
     }

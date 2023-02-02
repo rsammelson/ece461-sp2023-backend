@@ -1,6 +1,8 @@
+mod bus_factor;
 mod count_commits;
 
 pub mod scores;
+use futures::FutureExt;
 pub use scores::{Score, Scores};
 
 pub mod metrics;
@@ -9,7 +11,8 @@ pub use metrics::Metrics;
 use async_trait::async_trait;
 use futures::future::join_all;
 use std::{path::Path, str::FromStr};
-use thiserror::Error;
+//use thiserror::Error;
+use std::error::Error;
 
 #[async_trait]
 /// The trait that defines scoring algorithms
@@ -19,10 +22,14 @@ use thiserror::Error;
 /// * `path`: File path to the root of a locally cloned git repository
 /// * `url`: Currently unused, some object to use for API requests
 trait Scorer {
-    async fn score<P: AsRef<Path> + Send>(&self, path: P, url: &str) -> Score;
+    async fn score<P: AsRef<Path> + Send>(
+        &self,
+        path: P,
+        url: &str,
+    ) -> Result<Score, Box<dyn Error>>;
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum ControllerError {
     #[error("Do not know the `{0}` metric")]
     MetricParseError(String),
@@ -48,6 +55,18 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
 ) -> Scores {
     Scores {
         name: name.to_string(),
-        scores: join_all(to_run.iter().map(|metric| metric.score(&path, url))).await,
+        scores: join_all(to_run.iter().map(|metric| {
+            metric.score(&path, url).map(|res| match res {
+                Ok(score) => score,
+                Err(err) => {
+                    eprintln!("{}", err);
+                    Score {
+                        metric: "metric error".to_string(),
+                        score: 1.,
+                    }
+                }
+            })
+        }))
+        .await,
     }
 }
