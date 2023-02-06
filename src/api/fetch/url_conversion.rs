@@ -1,14 +1,8 @@
-use crate::api;
+use crate::{api, api::fetch::GithubRepositoryName};
 use serde_json;
 use std::error::Error;
 use std::fmt::Display;
 use url;
-
-#[derive(Debug)]
-pub struct GithubRepositoryName {
-    pub owner: String,
-    pub name: String,
-}
 
 #[derive(Debug)]
 pub struct URLError(&'static str);
@@ -33,7 +27,9 @@ impl Error for URLError {
     }
 }
 
-async fn http_to_repo_name(project_url: url::Url) -> Result<GithubRepositoryName, Box<dyn Error>> {
+async fn http_to_repo_name(
+    project_url: url::Url,
+) -> Result<GithubRepositoryName, Box<dyn Error + Send + Sync>> {
     if let url::Host::Domain(s) = project_url.host().ok_or("URL must have a host")? {
         let get_err = || Box::new(URLError("URL must be at least a second level domain name"));
 
@@ -64,7 +60,7 @@ async fn http_to_repo_name(project_url: url::Url) -> Result<GithubRepositoryName
 async fn npm_to_github_url(
     client: reqwest::Client,
     mut project_url: url::Url,
-) -> Result<url::Url, Box<dyn Error>> {
+) -> Result<url::Url, Box<dyn Error + Send + Sync>> {
     // ensure https
     if project_url.scheme() == "http" {
         project_url
@@ -125,7 +121,9 @@ async fn npm_to_github_url(
     }
 }
 
-fn github_to_repo_name(github_url: url::Url) -> Result<GithubRepositoryName, Box<dyn Error>> {
+fn github_to_repo_name(
+    github_url: url::Url,
+) -> Result<GithubRepositoryName, Box<dyn Error + Send + Sync>> {
     // the host should be a domain name, not an IP address
     if let url::Host::Domain(d) = github_url
         .host()
@@ -166,7 +164,7 @@ fn github_to_repo_name(github_url: url::Url) -> Result<GithubRepositoryName, Box
 
 pub async fn url_to_repo_name(
     project_url: url::Url,
-) -> Result<GithubRepositoryName, Box<dyn Error>> {
+) -> Result<GithubRepositoryName, Box<dyn Error + Send + Sync>> {
     // let client = api::get_client();
     if project_url.scheme() == "git" {
         github_to_repo_name(project_url)

@@ -9,6 +9,6 @@ fn get_client_builder() -> ClientBuilder {
         .https_only(true)
 }
 
-pub fn get_client() -> Result<Client, Box<dyn Error>> {
+pub fn get_client() -> Result<Client, Box<dyn Error + Send + Sync>> {
     Ok(get_client_builder().build()?)
 }
