@@ -11,42 +11,12 @@ permissions:
 
 jobs:
   run-formatter:
-    name: Run formatter
+    name: Run all checks
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
-        # we don't need the history right now
-        # with:
-        #   fetch-depth: 0
 
-      # - name: Get rust nightly
-      #   uses: actions-rs/toolchain@v1
-      #   with:
-      #       toolchain: nightly
-      #       components: rustfmt
-      #       override: true
-
-      - name: Check formatting
-        run: make verify_format
-
-  run-linter:
-    name: Run linter
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      # - name: Get rust nightly
-      #   uses: actions-rs/toolchain@v1
-      #   with:
-      #       toolchain: nightly
-      #       components: clippy
-      #       override: true
-
-      - name: Lint code
-        run: make lint
+      - name: Check all
+        run: make -k
