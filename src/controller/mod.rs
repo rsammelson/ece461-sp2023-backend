@@ -20,7 +20,6 @@ trait Scorer {
         &self,
         path: P,
         url: &str,
-        log_level: LogLevel,
     ) -> Result<f64, Box<dyn Error + Send + Sync>>;
 }
 
@@ -46,26 +45,17 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
     path: P,
     url: &str,
     to_run: &Metrics,
-    log_level: LogLevel,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
-    log::log(
-        log_level,
-        LogLevel::Minimal,
-        &format!("Starting analysis for {url}"),
-    );
+    log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));
 
     Ok(calculate_net_scores(Scores {
         url: url.to_string(),
-        scores: join_all(
-            to_run
-                .iter()
-                .map(|metric| metric.score(&path, url, log_level)),
-        )
-        .await
-        .into_iter()
-        .zip(to_run.iter())
-        .map(|(score, metric)| Ok((*metric, score?)))
-        .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
+        scores: join_all(to_run.iter().map(|metric| metric.score(&path, url)))
+            .await
+            .into_iter()
+            .zip(to_run.iter())
+            .map(|(score, metric)| Ok((*metric, score?)))
+            .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
         ..Scores::default()
     }))
 }

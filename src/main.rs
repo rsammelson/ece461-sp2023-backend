@@ -8,7 +8,7 @@ use tokio::task;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    log::log(LogLevel::All, LogLevel::Minimal, "Starting program...");
+    log::log(LogLevel::Minimal, "Starting program...");
 
     let urls = [
         "https://github.com/facebook/react",
@@ -35,7 +35,7 @@ async fn fetch_repo_run_scores(
     let repo = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
     let path = repo.path();
 
-    log::log(LogLevel::All, LogLevel::All, &format!("{path:?}"));
+    log::log(LogLevel::All, &format!("Repo at {path:?} updated"));
 
-    controller::run_metrics(path, url, &controller::Metrics::all(), LogLevel::All).await
+    controller::run_metrics(path, url, &controller::Metrics::all()).await
 }

@@ -19,11 +19,10 @@ impl Scorer for Metric {
         &self,
         path: P,
         url: &str,
-        log_level: LogLevel,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         use Metric::*;
         match self {
-            BusFactor(unit) => unit.score(path, url, log_level).await,
+            BusFactor(unit) => unit.score(path, url).await,
         }
     }
 }
