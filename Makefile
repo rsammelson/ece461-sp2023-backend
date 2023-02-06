@@ -1,9 +1,12 @@
-.PHONY: check verify_format lint
+.PHONY: check verify_format lint test
 
-check: verify_format lint
+check: verify_format lint test
 
 verify_format:
 	cargo fmt --check
 
 lint:
-	cargo clippy
+	cargo clippy -- -Dwarnings
+
+test:
+	cargo test
