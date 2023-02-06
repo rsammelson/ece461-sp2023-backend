@@ -1,3 +1,7 @@
+mod log;
+
+use log::{log, LogLevel};
+
 fn main() {
-    println!("Hello, world!");
+    log(LogLevel::All, LogLevel::Minimal, "Some message");
 }
