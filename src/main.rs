@@ -10,6 +10,8 @@ use std::{
 };
 use tokio::task;
 
+mod output;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::Minimal, "Starting program...");
@@ -30,9 +32,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         tasks.spawn(fetch_repo_run_scores(url));
     }
 
-    while let Some(score) = tasks.join_next().await {
-        println!("{}", score??);
-    }
+    output::console_output_sorted::print(tasks).await;
 
     log::log(
         LogLevel::Minimal,

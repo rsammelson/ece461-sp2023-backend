@@ -63,7 +63,7 @@ fn calculate_net_scores(scores: Scores) -> Scores {
     let mut sum = 0.;
 
     // add logic for weighted sum and normalization
-    for (_, score) in scores.scores.iter() {
+    for (_metric, score) in scores.scores.iter() {
         sum += score;
     }
 
