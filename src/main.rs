@@ -11,6 +11,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::All, LogLevel::Minimal, "Starting program...");
 
     let urls = [
+        "https://github.com/facebook/react",
         "https://github.com/npm/registry",
         "git://github.com/jonschlinkert/even.git",
         "https://www.npmjs.com/package/react-scripts",

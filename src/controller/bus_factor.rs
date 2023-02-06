@@ -26,9 +26,8 @@ impl Scorer for BusFactor {
 
         let repo = git2::Repository::open(path)?;
 
-        let mut walk = repo.revwalk().unwrap();
+        let mut walk = repo.revwalk()?;
         walk.set_sorting(git2::Sort::TIME)?;
-        walk.set_sorting(git2::Sort::TOPOLOGICAL)?;
         walk.push_head()?;
 
         let mut authors = HashMap::new();
@@ -39,10 +38,7 @@ impl Scorer for BusFactor {
             let commit = repo.find_commit(oid)?;
 
             let commit_time = commit.time().seconds() as u64;
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs();
+            let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
             if now - commit_time > YEAR_SECS {
                 break;
             }
@@ -51,7 +47,7 @@ impl Scorer for BusFactor {
             let name = author.name().map_or("unknown", |a| a);
 
             let parent = commit.parents().next();
-            let commit_score = score_commit_diff(&repo, parent.as_ref(), &commit);
+            let commit_score = score_commit_diff(&repo, parent.as_ref(), &commit)?;
             let author_score = authors.get(name).map_or(0., |c| *c);
 
             authors.insert(name.to_string(), author_score + commit_score);
@@ -61,8 +57,7 @@ impl Scorer for BusFactor {
             .values()
             .max_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Greater))
             .unwrap_or(&1.);
-        let repo_normalized_committers: f64 =
-            authors.values().filter(|s| **s > 0.01).sum::<f64>() / max;
+        let repo_normalized_committers = authors.values().sum::<f64>() / max;
 
         log::log(
             log_level,
@@ -88,21 +83,19 @@ fn score_commit_diff(
     repo: &git2::Repository,
     old: Option<&git2::Commit>,
     new: &git2::Commit,
-) -> f64 {
+) -> Result<f64, Box<dyn Error + Sync + Send>> {
     let old = if let Some(commit) = old {
-        commit.as_object().peel_to_tree().ok()
+        Some(commit.as_object().peel_to_tree()?)
     } else {
         None
     };
-    let new = new.as_object().peel_to_tree().ok();
+    let new = new.as_object().peel_to_tree()?;
 
-    let diff = repo
-        .diff_tree_to_tree(old.as_ref(), new.as_ref(), None)
-        .unwrap();
+    let diff = repo.diff_tree_to_tree(old.as_ref(), Some(&new), None)?;
 
-    let stats = diff.stats().unwrap();
+    let stats = diff.stats()?;
 
-    score_commit(stats.insertions())
+    Ok(score_commit(stats.insertions()))
 }
 
 fn score_commit(added: usize) -> f64 {
