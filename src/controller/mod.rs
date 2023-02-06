@@ -1,32 +1,27 @@
 mod bus_factor;
-mod count_commits;
 
 pub mod scores;
-pub use scores::{Score, Scores};
+pub use scores::Scores;
 
 pub mod metrics;
 pub use metrics::Metrics;
 
-use crate::log::{log, LogLevel};
+use crate::log;
+use crate::log::LogLevel;
 
 use async_trait::async_trait;
 use futures::future::join_all;
-use std::{error::Error, path::Path, str::FromStr};
+use std::{collections::HashMap, error::Error, path::Path, str::FromStr};
 
 #[async_trait]
 /// The trait that defines scoring algorithms
-///
-/// Arguments:
-///
-/// * `path`: File path to the root of a locally cloned git repository
-/// * `url`: Currently unused, some object to use for API requests
 trait Scorer {
     async fn score<P: AsRef<Path> + Send>(
         &self,
         path: P,
         url: &str,
         log_level: LogLevel,
-    ) -> Result<Score, Box<dyn Error + Send + Sync>>;
+    ) -> Result<f64, Box<dyn Error + Send + Sync>>;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -50,16 +45,16 @@ pub enum ControllerError {
 pub async fn run_metrics<P: AsRef<Path> + Sync>(
     path: P,
     url: &str,
-    to_run: Metrics,
+    to_run: &Metrics,
     log_level: LogLevel,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
-    log(
+    log::log(
         log_level,
         LogLevel::Minimal,
         &format!("Starting analysis for {url}"),
     );
 
-    Ok(Scores {
+    Ok(calculate_net_scores(Scores {
         url: url.to_string(),
         scores: join_all(
             to_run
@@ -68,6 +63,23 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
         )
         .await
         .into_iter()
-        .collect::<Result<Vec<Score>, Box<dyn Error + Send + Sync>>>()?,
-    })
+        .zip(to_run.iter())
+        .map(|(score, metric)| Ok((*metric, score?)))
+        .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
+        ..Scores::default()
+    }))
+}
+
+fn calculate_net_scores(scores: Scores) -> Scores {
+    let mut sum = 0.;
+
+    // add logic for weighted sum and normalization
+    for (_, score) in scores.scores.iter() {
+        sum += score;
+    }
+
+    Scores {
+        net_score: sum,
+        ..scores
+    }
 }

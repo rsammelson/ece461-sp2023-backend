@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{fmt::Display, ops::Deref};
 
 use crate::controller::*;
 
@@ -8,6 +8,7 @@ use crate::controller::*;
 /// - this struct with variant that contains the unit struct
 /// - `FromStr` for `Metric`
 /// - `all()` for `Metrics`
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Metric {
     BusFactor(bus_factor::BusFactor),
 }
@@ -19,10 +20,18 @@ impl Scorer for Metric {
         path: P,
         url: &str,
         log_level: LogLevel,
-    ) -> Result<Score, Box<dyn Error + Send + Sync>> {
+    ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         use Metric::*;
         match self {
             BusFactor(unit) => unit.score(path, url, log_level).await,
+        }
+    }
+}
+
+impl Display for Metric {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Metric::BusFactor(_) => write!(f, "BusFactor"),
         }
     }
 }

@@ -36,5 +36,5 @@ async fn fetch_repo_run_scores(
 
     log::log(LogLevel::All, LogLevel::All, &format!("{path:?}"));
 
-    controller::run_metrics(path, url, controller::Metrics::all(), LogLevel::All).await
+    controller::run_metrics(path, url, &controller::Metrics::all(), LogLevel::All).await
 }

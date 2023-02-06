@@ -7,6 +7,7 @@ use std::{
 
 const YEAR_SECS: u64 = 60 * 60 * 24 * 365;
 
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct BusFactor();
 
 #[async_trait]
@@ -16,8 +17,8 @@ impl Scorer for BusFactor {
         path: P,
         url: &str,
         log_level: LogLevel,
-    ) -> Result<Score, Box<dyn Error + Send + Sync>> {
-        log(
+    ) -> Result<f64, Box<dyn Error + Send + Sync>> {
+        log::log(
             log_level,
             LogLevel::All,
             &format!("Starting to analyze BusFactor for {url}"),
@@ -63,16 +64,13 @@ impl Scorer for BusFactor {
         let repo_normalized_committers: f64 =
             authors.values().filter(|s| **s > 0.01).sum::<f64>() / max;
 
-        log(
+        log::log(
             log_level,
             LogLevel::All,
             &format!("Done analyzing BusFactor for {url}"),
         );
 
-        Ok(Score {
-            metric: "BusFactor".to_string(),
-            score: score_normalized_committers(repo_normalized_committers),
-        })
+        Ok(score_normalized_committers(repo_normalized_committers))
     }
 }
 
