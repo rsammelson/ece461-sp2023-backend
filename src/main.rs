@@ -32,16 +32,9 @@ async fn fetch_repo_run_scores(
     url: &str,
 ) -> Result<controller::Scores, Box<dyn Error + Send + Sync>> {
     let repo = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
-    println!("{:#?} {:#?}", repo.is_shallow(), repo.is_bare());
-    println!("{:#?}", repo.path());
-
     let path = repo.path();
 
-    Ok(controller::run_metrics(
-        "name_of_repo",
-        path,
-        url,
-        controller::Metrics::try_from(vec!["CountCommits", "CountCommits2"]).unwrap(),
-    )
-    .await)
+    log::log(LogLevel::All, LogLevel::All, &format!("{path:?}"));
+
+    controller::run_metrics(path, url, controller::Metrics::all(), LogLevel::All).await
 }

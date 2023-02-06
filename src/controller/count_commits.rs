@@ -9,7 +9,8 @@ impl Scorer for CountCommits {
         &self,
         path: P,
         _url: &str,
-    ) -> Result<Score, Box<dyn Error>> {
+        _log_level: LogLevel,
+    ) -> Result<Score, Box<dyn Error + Send + Sync>> {
         let repo = match git2::Repository::open(path) {
             Ok(repo) => repo,
             Err(e) => panic!("failed to open repository at `{e}`"),

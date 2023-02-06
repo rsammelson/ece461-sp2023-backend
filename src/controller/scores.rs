@@ -5,7 +5,7 @@ use std::fmt::Display;
 /// ```
 /// use backend::controller::{Score, Scores};
 /// let result = Scores {
-///     name: "example_name".to_string(),
+///     url: "example_url".to_string(),
 ///     scores: vec![
 ///         Score {
 ///             metric: "Field 1".to_string(),
@@ -19,27 +19,23 @@ use std::fmt::Display;
 /// };
 /// assert_eq!(
 ///     format!("{}", result),
-///     r#"{"example_name": {"Field 1": 1.1, "Field 2": 0.3}}"#
+///     r#"{"URL": "example_url", "Field 1": 1.1, "Field 2": 0.3}"#
 /// );
 /// ```
 pub struct Scores {
-    pub name: String,
+    pub url: String,
     pub scores: Vec<Score>,
 }
 
 impl Display for Scores {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, r#"{{"{}": {{"#, self.name)?;
+        write!(f, r#"{{"URL": "{}""#, self.url)?;
 
-        let mut scores = self.scores.iter();
-        if let Some(first) = scores.next() {
-            write!(f, "{first}")?;
-        }
-        for score in scores {
+        for score in self.scores.iter() {
             write!(f, ", {score}")?;
         }
 
-        write!(f, "}}}}")?;
+        write!(f, "}}")?;
         Ok(())
     }
 }

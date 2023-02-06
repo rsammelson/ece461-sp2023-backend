@@ -4,10 +4,11 @@ use crate::controller::*;
 
 /// An enum that is used to tell `run_metrics()` what to run
 ///
-/// For each added scoring algorithm, add a new variant that simply
-/// contains the unit struct created to implement the `Scorer` trait
+/// For each added scoring metric, please update:
+/// - this struct with variant that contains the unit struct
+/// - `FromStr` for `Metric`
+/// - `all()` for `Metrics`
 pub enum Metric {
-    CountCommits(count_commits::CountCommits),
     BusFactor(bus_factor::BusFactor),
 }
 
@@ -17,11 +18,11 @@ impl Scorer for Metric {
         &self,
         path: P,
         url: &str,
-    ) -> Result<Score, Box<dyn Error>> {
+        log_level: LogLevel,
+    ) -> Result<Score, Box<dyn Error + Send + Sync>> {
         use Metric::*;
         match self {
-            CountCommits(unit) => unit.score(path, url).await,
-            BusFactor(unit) => unit.score(path, url).await,
+            BusFactor(unit) => unit.score(path, url, log_level).await,
         }
     }
 }
@@ -31,7 +32,6 @@ impl FromStr for Metric {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use Metric::*;
         match s {
-            "CountCommits" => Ok(CountCommits(count_commits::CountCommits())),
             "BusFactor" => Ok(BusFactor(bus_factor::BusFactor())),
             _ => Err(ControllerError::MetricParseError(s.to_string())),
         }
@@ -47,18 +47,19 @@ impl TryFrom<&str> for Metric {
 
 pub struct Metrics(Vec<Metric>);
 
-impl<T> TryFrom<Vec<T>> for Metrics
-where
-    T: TryInto<Metric, Error = ControllerError>,
-{
+impl Metrics {
+    pub fn all() -> Self {
+        Metrics(vec![Metric::BusFactor(bus_factor::BusFactor())])
+    }
+}
+
+impl TryFrom<Vec<&str>> for Metrics {
     type Error = ControllerError;
-    fn try_from(value: Vec<T>) -> Result<Self, Self::Error> {
-        // couldn't get a `.collect()` thing working
-        // kept having type errors -_-
-        let mut ret = Vec::with_capacity(value.len());
-        for metric in value {
-            ret.push(metric.try_into()?);
-        }
+    fn try_from(value: Vec<&str>) -> Result<Self, Self::Error> {
+        let ret = value
+            .iter()
+            .map(|it| (*it).try_into())
+            .collect::<Result<Vec<Metric>, ControllerError>>()?;
         Ok(Metrics(ret))
     }
 }
