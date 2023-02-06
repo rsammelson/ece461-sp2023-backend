@@ -3,7 +3,6 @@ pub mod url_conversion;
 use dirs;
 use git2::Repository;
 use std::error::Error;
-use std::fmt::Display;
 use std::path::PathBuf;
 use tokio::fs;
 use tokio::task;
@@ -15,96 +14,18 @@ pub struct GithubRepositoryName {
     pub name: String,
 }
 
-#[derive(Debug)]
-struct RepoError {
-    message: String,
-}
-
-impl Display for RepoError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self.message))
-    }
-}
-
-impl Error for RepoError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
-    }
+#[derive(Debug, thiserror::Error)]
+pub enum RepositoryCreationError {
+    #[error("Error while getting repository: `{0}`")]
+    RepoError(&'static str),
+    #[error("Error while getting repository: `{0}`")]
+    OtherError(&'static str),
 }
 
 fn get_cache_dir() -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
-    Ok(dirs::cache_dir().ok_or_else(|| RepoError {
-        message: "Cannot locate home directory".to_owned(),
-    })?)
-}
-
-fn update_repo(url: &str, repo_path: PathBuf) -> Result<Repository, Box<dyn Error + Send + Sync>> {
-    let repo = Repository::open(repo_path)?;
-
-    // check for changes
-    if repo.state() != git2::RepositoryState::Clean {
-        return Err(Box::new(RepoError {
-            message: "Repository exists but is not clean".to_owned(),
-        }));
-    }
-
-    // get the remote
-    let mut remote = None;
-    let mut remote_name = None;
-    let remotes = repo.remotes()?;
-    for rn in remotes.iter().flatten() {
-        let remote_object = repo.find_remote(rn)?;
-        if let Some(remote_url) = remote_object.url() {
-            if remote_url == url {
-                // found remote
-                remote = Some(remote_object);
-                remote_name = Some(rn);
-                break;
-            }
-        }
-    }
-    if remote.is_none() {
-        remote = Some(repo.remote("acme_tool_remote", url)?);
-        remote_name = Some("acme_tool_remote");
-    }
-    let mut remote = remote.unwrap();
-    let remote_name = remote_name.unwrap();
-
-    // checkout main branch
-    remote.connect(git2::Direction::Fetch)?;
-    let default_branch = remote.default_branch()?;
-    let default_branch_str = default_branch.as_str().ok_or_else(|| {
-        Box::new(RepoError {
-            message: "Default branch name was not valid UTF-8".to_owned(),
-        })
-    })?;
-    remote.fetch(&[default_branch_str], None, Some("acme tool"))?;
-
-    let default_branch_name = default_branch_str
-        .split_once('/')
-        .unwrap()
-        .1
-        .split_once('/')
-        .unwrap()
-        .1;
-    let remote_branch_name = format!("{remote_name}/{default_branch_name}");
-
-    let remote_branch = repo.find_branch(&remote_branch_name, git2::BranchType::Remote)?;
-    let remote_branch_head = repo.reference_to_annotated_commit(&remote_branch.into_reference())?;
-
-    repo.set_head_detached_from_annotated(remote_branch_head)?;
-    repo.checkout_head(None)?;
-
-    drop(remote);
-    Ok(repo)
+    Ok(dirs::cache_dir().ok_or(RepositoryCreationError::OtherError(
+        "Cannot locate home directory",
+    ))?)
 }
 
 pub async fn fetch_repo(project_url: url::Url) -> Result<Repository, Box<dyn Error + Send + Sync>> {
@@ -133,8 +54,74 @@ pub async fn fetch_repo(project_url: url::Url) -> Result<Repository, Box<dyn Err
             // lacking permissions
             Err(Box::new(e))
         }
-        Ok(_) => Err(Box::new(RepoError {
-            message: "Repository clone location exists as a file".to_owned(),
-        })),
+        Ok(_) => Err(Box::new(RepositoryCreationError::RepoError(
+            "Repository clone location exists as a file",
+        ))),
     }
+}
+
+fn update_repo(url: &str, repo_path: PathBuf) -> Result<Repository, Box<dyn Error + Send + Sync>> {
+    let repo = Repository::open(repo_path)?;
+
+    // check for changes
+    if repo.state() != git2::RepositoryState::Clean {
+        return Err(Box::new(RepositoryCreationError::RepoError(
+            "Repository exists but is not clean",
+        )));
+    }
+
+    let (mut remote, remote_name) = get_remote(&repo, url)?;
+
+    // checkout main branch
+    remote.connect(git2::Direction::Fetch)?;
+    let default_branch = remote.default_branch()?;
+    let default_branch_str = default_branch.as_str().ok_or_else(|| {
+        Box::new(RepositoryCreationError::RepoError(
+            "Default branch name was not valid UTF-8",
+        ))
+    })?;
+    remote.fetch(&[default_branch_str], None, Some("acme tool"))?;
+
+    let default_branch_name = default_branch_str
+        .split_once('/')
+        .unwrap()
+        .1
+        .split_once('/')
+        .unwrap()
+        .1;
+    let remote_branch_name = format!("{remote_name}/{default_branch_name}");
+
+    let remote_branch = repo.find_branch(&remote_branch_name, git2::BranchType::Remote)?;
+    let remote_branch_head = repo.reference_to_annotated_commit(&remote_branch.into_reference())?;
+
+    repo.set_head_detached_from_annotated(remote_branch_head)?;
+    repo.checkout_head(None)?;
+
+    drop(remote);
+    Ok(repo)
+}
+
+fn get_remote<'repo>(
+    repo: &'repo Repository,
+    url: &str,
+) -> Result<(git2::Remote<'repo>, String), Box<dyn Error + Send + Sync>> {
+    let mut remote = None;
+    let mut remote_name = None;
+    let remotes = repo.remotes()?;
+    for rn in remotes.iter().flatten() {
+        let remote_object = repo.find_remote(rn)?;
+        if let Some(remote_url) = remote_object.url() {
+            if remote_url == url {
+                // found remote
+                remote = Some(remote_object);
+                remote_name = Some(rn.to_owned());
+                break;
+            }
+        }
+    }
+    if remote.is_none() {
+        remote = Some(repo.remote("acme_tool_remote", url)?);
+        remote_name = Some("acme_tool_remote".to_owned());
+    }
+    Ok((remote.unwrap(), remote_name.unwrap()))
 }
