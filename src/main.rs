@@ -1,4 +1,5 @@
 mod api;
+mod controller;
 mod log;
 
 use log::LogLevel;
@@ -10,6 +11,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::All, LogLevel::Minimal, "Starting program...");
 
     let urls = [
+        "https://github.com/facebook/react",
         "https://github.com/npm/registry",
         "git://github.com/jonschlinkert/even.git",
         "https://www.npmjs.com/package/react-scripts",
@@ -17,19 +19,23 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     let mut tasks = task::JoinSet::new();
     for url in urls {
-        tasks.spawn(fetch_repo(url));
+        tasks.spawn(fetch_repo_run_scores(url));
     }
 
-    while let Some(t) = tasks.join_next().await {
-        t??
+    while let Some(score) = tasks.join_next().await {
+        println!("{}", score??);
     }
 
     Ok(())
 }
 
-async fn fetch_repo(url: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn fetch_repo_run_scores(
+    url: &str,
+) -> Result<controller::Scores, Box<dyn Error + Send + Sync>> {
     let repo = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
-    println!("{:#?} {:#?}", repo.is_shallow(), repo.is_bare());
-    println!("{:#?}", repo.path());
-    Ok(())
+    let path = repo.path();
+
+    log::log(LogLevel::All, LogLevel::All, &format!("{path:?}"));
+
+    controller::run_metrics(path, url, &controller::Metrics::all(), LogLevel::All).await
 }
