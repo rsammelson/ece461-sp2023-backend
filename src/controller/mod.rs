@@ -1,13 +1,12 @@
 mod bus_factor;
 
-pub mod scores;
+mod scores;
 pub use scores::Scores;
 
-pub mod metrics;
+mod metrics;
 pub use metrics::Metrics;
 
-use crate::log;
-use crate::log::LogLevel;
+use crate::{api::fetch::GithubRepositoryName, log, log::LogLevel};
 
 use async_trait::async_trait;
 use futures::future::join_all;
@@ -19,7 +18,7 @@ trait Scorer {
     async fn score<P: AsRef<Path> + Send>(
         &self,
         path: P,
-        url: &str,
+        url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>>;
 }
 
@@ -43,7 +42,7 @@ pub enum ControllerError {
 /// bewteen threads. The docs imply this is possible, but the type does not implement `Sync`.
 pub async fn run_metrics<P: AsRef<Path> + Sync>(
     path: P,
-    url: &str,
+    url: &GithubRepositoryName,
     to_run: &Metrics,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));

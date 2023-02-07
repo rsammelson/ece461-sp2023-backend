@@ -3,6 +3,7 @@ mod controller;
 mod log;
 
 use log::LogLevel;
+
 use std::{
     error::Error,
     time::{SystemTime, UNIX_EPOCH},
@@ -44,10 +45,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 async fn fetch_repo_run_scores(
     url: &str,
 ) -> Result<controller::Scores, Box<dyn Error + Send + Sync>> {
-    let repo = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
-    let path = repo.path();
+    let (repo_local, repo_name) = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
+    let path = repo_local.path();
 
-    log::log(LogLevel::All, &format!("Repo at {path:?} updated"));
-
-    controller::run_metrics(path, url, &controller::Metrics::all()).await
+    controller::run_metrics(path, &repo_name, &controller::Metrics::all()).await
 }

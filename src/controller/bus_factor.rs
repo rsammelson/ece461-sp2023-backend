@@ -15,7 +15,7 @@ impl Scorer for BusFactor {
     async fn score<P: AsRef<Path> + Send>(
         &self,
         path: P,
-        url: &str,
+        url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         log::log(
             LogLevel::All,

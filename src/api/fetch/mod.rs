@@ -1,17 +1,23 @@
 pub mod url_conversion;
 
+use crate::{log, log::LogLevel};
+
 use dirs;
 use git2::Repository;
-use std::error::Error;
-use std::path::PathBuf;
-use tokio::fs;
-use tokio::task;
+use std::{error::Error, fmt::Display, path::PathBuf};
+use tokio::{fs, task};
 use url;
 
 #[derive(Debug)]
 pub struct GithubRepositoryName {
     pub owner: String,
     pub name: String,
+}
+
+impl Display for GithubRepositoryName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.owner, self.name)
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -28,36 +34,53 @@ fn get_cache_dir() -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
     ))?)
 }
 
-pub async fn fetch_repo(project_url: url::Url) -> Result<Repository, Box<dyn Error + Send + Sync>> {
+/// Given a `Url`,
+/// if a repository already exists at $HOME/.cache/acme/{user}/{repo},
+/// - fetch from remote and update local state
+///
+/// if a local repository does not exist,
+/// - clone it
+pub async fn fetch_repo(
+    project_url: url::Url,
+) -> Result<(Repository, GithubRepositoryName), Box<dyn Error + Send + Sync>> {
     let repo = url_conversion::url_to_repo_name(project_url).await?;
+
+    log::log(LogLevel::All, &format!("Starting update for {repo}"));
 
     let url = format!("https://github.com/{}/{}.git", repo.owner, repo.name);
 
-    let path = get_cache_dir()?.join("acme").join(repo.owner);
-    let repo_path = path.join(repo.name);
+    let path = get_cache_dir()?.join("acme").join(&repo.owner);
+    let repo_path = path.join(&repo.name);
 
     fs::create_dir_all(path).await?;
 
-    match fs::metadata(repo_path.clone()).await {
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            // directory does not exist
-            Ok(task::spawn_blocking(move || Repository::clone(&url, repo_path)).await??)
-        }
+    // `repo` moved into return value
+    let done_str = &format!("Done updating {repo}");
+
+    let ret = match fs::metadata(repo_path.clone()).await {
+        // directory does not exist
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok((
+            task::spawn_blocking(move || Repository::clone(&url, repo_path)).await??,
+            repo,
+        )),
         Ok(m) if m.is_dir() => {
             // directory exists
             match task::spawn_blocking(move || update_repo(&url, repo_path)).await? {
-                Ok(repo) => Ok(repo),
+                Ok(repo_local) => Ok((repo_local, repo)),
                 Err(e) => Err(e),
             }
         }
-        Err(e) => {
-            // lacking permissions
-            Err(Box::new(e))
+        // lacking permissions
+        Err(e) => return Err(Box::new(e)),
+        Ok(_) => {
+            return Err(Box::new(RepositoryCreationError::RepoError(
+                "Repository clone location exists as a file",
+            )))
         }
-        Ok(_) => Err(Box::new(RepositoryCreationError::RepoError(
-            "Repository clone location exists as a file",
-        ))),
-    }
+    };
+
+    log::log(LogLevel::All, done_str);
+    ret
 }
 
 fn update_repo(url: &str, repo_path: PathBuf) -> Result<Repository, Box<dyn Error + Send + Sync>> {
