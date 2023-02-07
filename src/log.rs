@@ -1,7 +1,10 @@
-use std::fs::OpenOptions;
-use std::io::prelude::*;
-use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    fs::{File, OpenOptions},
+    io::Write,
+    path::PathBuf,
+    sync::Mutex,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use lazy_static::lazy_static;
 
@@ -23,9 +26,18 @@ lazy_static! {
         },
         Err(_) => LogLevel::None,
     };
-    static ref LOG_FILE: PathBuf = match std::env::var("LOG_FILE") {
-        Ok(filename) => PathBuf::from(filename),
-        Err(_) => dirs::cache_dir().unwrap().join("acme").join("log"),
+    static ref LOG_FILE: Mutex<File> = {
+        let path = match std::env::var("LOG_FILE") {
+            Ok(filename) => PathBuf::from(filename),
+            Err(_) => dirs::cache_dir().unwrap().join("acme").join("log"),
+        };
+        Mutex::new(
+            OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(path)
+                .unwrap(),
+        )
     };
 }
 
@@ -36,11 +48,7 @@ pub fn log(min_level: LogLevel, message: &str) {
             .unwrap()
             .as_secs();
 
-        let mut log_file = OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open(&*LOG_FILE)
-            .unwrap();
+        let mut log_file = LOG_FILE.lock().unwrap();
 
         match writeln!(log_file, "[{now}] {message}") {
             Ok(_) => (),
