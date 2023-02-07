@@ -1,3 +1,6 @@
+use std::fs::OpenOptions;
+use std::io::prelude::*;
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use lazy_static::lazy_static;
@@ -11,14 +14,18 @@ pub enum LogLevel {
 }
 
 lazy_static! {
-    static ref LOG_LEVEL: LogLevel = match std::env::var("acme_log_level") {
+    static ref LOG_LEVEL: LogLevel = match std::env::var("LOG_LEVEL") {
         Ok(level) => match level.to_lowercase().as_ref() {
-            "all" => LogLevel::All,
-            "minimal" => LogLevel::Minimal,
-            "none" => LogLevel::None,
+            "2" | "all" => LogLevel::All,
+            "1" | "minimal" => LogLevel::Minimal,
+            "0" | "none" => LogLevel::None,
             _ => LogLevel::None,
         },
         Err(_) => LogLevel::None,
+    };
+    static ref LOG_FILE: PathBuf = match std::env::var("LOG_FILE") {
+        Ok(filename) => PathBuf::from(filename),
+        Err(_) => dirs::cache_dir().unwrap().join("acme").join("log"),
     };
 }
 
@@ -28,6 +35,16 @@ pub fn log(min_level: LogLevel, message: &str) {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        eprintln!("[{now}] {message}");
+
+        let mut log_file = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(&*LOG_FILE)
+            .unwrap();
+
+        match writeln!(log_file, "[{now}] {message}") {
+            Ok(_) => (),
+            Err(e) => eprintln!("{e}"),
+        };
     }
 }

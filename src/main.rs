@@ -3,12 +3,19 @@ mod controller;
 mod log;
 
 use log::LogLevel;
-use std::error::Error;
+use std::{
+    error::Error,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use tokio::task;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::Minimal, "Starting program...");
+    let start_time = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
 
     let urls = [
         "https://github.com/facebook/react",
@@ -25,6 +32,11 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     while let Some(score) = tasks.join_next().await {
         println!("{}", score??);
     }
+
+    log::log(
+        LogLevel::Minimal,
+        &format!("Done with run started at {start_time}"),
+    );
 
     Ok(())
 }
