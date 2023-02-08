@@ -3,6 +3,7 @@ mod controller;
 mod input;
 mod log;
 mod output;
+mod cli;
 
 use log::LogLevel;
 
