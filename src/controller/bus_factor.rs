@@ -12,9 +12,9 @@ pub struct BusFactor();
 
 #[async_trait]
 impl Scorer for BusFactor {
-    async fn score<P: AsRef<Path> + Send>(
+    async fn score(
         &self,
-        path: P,
+        repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         log::log(
@@ -22,7 +22,7 @@ impl Scorer for BusFactor {
             &format!("Starting to analyze BusFactor for {url}"),
         );
 
-        let repo = git2::Repository::open(path)?;
+        let repo = repo.lock().await;
 
         let mut walk = repo.revwalk()?;
         walk.set_sorting(git2::Sort::TIME)?;

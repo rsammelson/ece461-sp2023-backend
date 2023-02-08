@@ -5,9 +5,9 @@ pub struct LicenseCompatibility();
 
 #[async_trait]
 impl Scorer for LicenseCompatibility {
-    async fn score<P: AsRef<Path> + Send>(
+    async fn score(
         &self,
-        _path: P,
+        _repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         log::log(

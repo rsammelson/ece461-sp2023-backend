@@ -15,14 +15,15 @@ use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
 
 use async_trait::async_trait;
 use futures::future::join_all;
-use std::{collections::HashMap, error::Error, path::Path, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
+use tokio::sync::Mutex;
 
 #[async_trait]
 /// The trait that defines scoring algorithms
 trait Scorer {
-    async fn score<P: AsRef<Path> + Send>(
+    async fn score(
         &self,
-        path: P,
+        repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>>;
 }
@@ -39,8 +40,8 @@ trait Scorer {
 /// TODO: see if having each metric open its own Repository is slower than running in sequence
 /// with the same object. Alternatively, figure out how to share the Repository object
 /// bewteen threads. The docs imply this is possible, but the type does not implement `Sync`.
-pub async fn run_metrics<P: AsRef<Path> + Sync>(
-    path: P,
+pub async fn run_metrics(
+    repo: &Mutex<git2::Repository>,
     url: &GithubRepositoryName,
     to_run: Arc<Metrics>,
     weights: Arc<input::Weights>,
@@ -50,7 +51,7 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
     Ok(calculate_net_scores(
         Scores {
             url: url.to_string(),
-            scores: join_all(to_run.iter().map(|metric| metric.score(&path, url)))
+            scores: join_all(to_run.iter().map(|metric| metric.score(repo, url)))
                 .await
                 .into_iter()
                 .zip(to_run.iter())
