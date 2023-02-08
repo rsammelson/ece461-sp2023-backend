@@ -63,16 +63,22 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
     ))
 }
 
-fn calculate_net_scores(scores: Scores, _weights: Arc<crate::input::Weights>) -> Scores {
+fn calculate_net_scores(scoreset: Scores, weightset: Arc<input::Weights>) -> Scores { //
     let mut sum = 0.;
 
     // add logic for weighted sum and normalization
-    for (_metric, score) in scores.scores.iter() {
-        sum += score;
+    let mut weightvar = 1;
+    let mut weightsum = 0;
+    for (metric, score) in scoreset.scores.iter() {
+        //figure out how to get correct key for each weight
+        sum += (score * weightvar);
+        weightsum+= weightvar;
     }
+
+    sum = sum/weightsum;
 
     Scores {
         net_score: sum,
-        ..scores
+        ..scoreset
     }
 }
