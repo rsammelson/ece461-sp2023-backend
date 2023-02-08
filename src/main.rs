@@ -3,7 +3,6 @@ mod controller;
 mod input;
 mod log;
 mod output;
-mod cli;
 
 use log::LogLevel;
 
@@ -25,18 +24,13 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .unwrap()
         .as_secs();
 
-    let urls = [
-        "https://github.com/facebook/react",
-        "https://github.com/npm/registry",
-        "git://github.com/jonschlinkert/even.git",
-        "https://www.npmjs.com/package/react-scripts",
-    ];
+    let (weights, urls) = input::cli::get_inputs();
 
     let metrics = Arc::new(Metrics::all());
-    let weights = Arc::new(Weights::new());
+    let weights = Arc::new(weights);
 
     let mut tasks = task::JoinSet::new();
-    for url in urls {
+    for url in urls.urls {
         tasks.spawn(fetch_repo_run_scores(
             url,
             Arc::clone(&metrics),
@@ -55,11 +49,11 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 }
 
 async fn fetch_repo_run_scores(
-    url: &str,
+    url: String,
     metrics: Arc<Metrics>,
     weights: Arc<Weights>,
 ) -> Result<controller::Scores, Box<dyn Error + Send + Sync>> {
-    let (repo_local, repo_name) = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
+    let (repo_local, repo_name) = api::fetch::fetch_repo(url::Url::parse(&url).unwrap()).await?;
     let path = repo_local.path();
 
     controller::run_metrics(path, &repo_name, metrics, weights).await

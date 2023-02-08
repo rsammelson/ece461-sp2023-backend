@@ -1,4 +1,4 @@
-extern crate clap;
+use crate::input::{Urls, Weights};
 
 use clap::Parser;
 
@@ -20,15 +20,7 @@ pub struct Cli {
     disable_tests: Option<bool>,
 }
 
-pub struct Weights {
-    bus_factor: f64,
-    correctness_factor: f64,
-    ramp_up_time: f64,
-    responsiveness: f64,
-    license_compatibility: f64,
-}
-
-fn main() {
+pub fn get_inputs() -> (Weights, Urls) {
     let args = Cli::parse();
 
     let weights = Weights {
@@ -39,16 +31,7 @@ fn main() {
         license_compatibility: args.license_compatibility.unwrap_or(1.0),
     };
 
-    match args.pattern.as_ref() {
-        "install" => println!("Installing dependencies"),
-        "build" => println!("building dependencies"),
-        "test" => println!(
-            "Running unit tests: the weights are: {:?}",
-            weights.bus_factor
-        ),
-        file if file.ends_with(".txt") => {
-            println!("Running unit tests from {file}");
-        }
-        _ => println!("no command specified, run './run help' for more information"),
-    };
+    let urls = Urls::new();
+
+    (weights, urls)
 }

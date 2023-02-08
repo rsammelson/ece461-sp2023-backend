@@ -1,9 +1,15 @@
+pub mod cli;
+
 pub struct Weights {
     pub bus_factor: f64,
     pub correctness_factor: f64,
     pub ramp_up_time: f64,
     pub responsiveness: f64,
     pub license_compatibility: f64,
+}
+
+pub struct Urls {
+    pub urls: Vec<String>,
 }
 
 impl Weights {
@@ -19,6 +25,18 @@ impl Weights {
 }
 
 impl Default for Weights {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Urls {
+    pub fn new() -> Self {
+        Urls { urls: Vec::new() }
+    }
+}
+
+impl Default for Urls {
     fn default() -> Self {
         Self::new()
     }
