@@ -9,7 +9,7 @@ pub async fn print(mut tasks: JoinSet<Result<Scores, Box<dyn Error + Send + Sync
         all_scores.push(t);
     }
 
-    all_scores.sort_by(|a, b| b.score.cmp(&a.score));
+    all_scores.sort_by(|a, b| a.net_score.partial_cmp(&b.net_score).unwrap());
 
     for repo in all_scores {
         println!("{repo}");

@@ -1,4 +1,8 @@
 mod bus_factor;
+//mod correctness_factor;
+//mod ramp_up_time;
+//mod responsiveness;
+//mod license_compatibility;
 
 mod scores;
 pub use scores::Scores;
@@ -6,7 +10,8 @@ pub use scores::Scores;
 mod metrics;
 pub use metrics::Metrics;
 
-use crate::{api::fetch::GithubRepositoryName, log, log::LogLevel};
+use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
+use metrics::Metric;
 
 use async_trait::async_trait;
 use futures::future::join_all;
@@ -63,19 +68,26 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
     ))
 }
 
-fn calculate_net_scores(scoreset: Scores, weightset: Arc<input::Weights>) -> Scores { //
+fn calculate_net_scores(scoreset: Scores, weightset: Arc<input::Weights>) -> Scores {
     let mut sum = 0.;
-
-    // add logic for weighted sum and normalization
-    let mut weightvar = 1;
-    let mut weightsum = 0;
+    let mut weightsum = 0.;
     for (metric, score) in scoreset.scores.iter() {
-        //figure out how to get correct key for each weight
-        sum += (score * weightvar);
-        weightsum+= weightvar;
+        let weightvar = match metric {
+            Metric::BusFactor(_) => weightset.bus_factor,
+            Metric::CorrectnessFactor => weightset.correctness_factor,
+            Metric::RampUpTime => weightset.ramp_up_time,
+            Metric::Responsiveness => weightset.responsiveness,
+            Metric::LicenseCompatibility => weightset.license_compatibility,
+        };
+
+        sum += score * weightvar;
+        weightsum += weightvar;
     }
 
-    sum = sum/weightsum;
+
+    if weightsum > 0. {
+        sum /= weightsum;
+    }
 
     Scores {
         net_score: sum,
