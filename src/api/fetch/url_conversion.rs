@@ -1,4 +1,4 @@
-use crate::{api, api::fetch::GithubRepositoryName};
+use crate::{api, api::fetch::GithubRepositoryName, log, log::LogLevel};
 use std::error::Error;
 
 #[derive(Debug, thiserror::Error)]
@@ -30,6 +30,10 @@ async fn http_to_repo_name(
                 let domain = domain_parts.next().ok_or_else(get_err)?;
                 match domain {
                     "npmjs" => {
+                        log::log(
+                            LogLevel::Minimal,
+                            &format!("Attempmting to convert {project_url} to a GitHub url"),
+                        );
                         let client = api::get_client()?;
                         let github_url = npm_to_github_url(client, project_url).await?;
                         github_to_repo_name(github_url)

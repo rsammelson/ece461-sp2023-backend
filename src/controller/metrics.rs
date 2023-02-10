@@ -18,12 +18,11 @@ impl Scorer for Metric {
     async fn score<P: AsRef<Path> + Send>(
         &self,
         path: P,
-        url: &str,
-        log_level: LogLevel,
+        url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         use Metric::*;
         match self {
-            BusFactor(unit) => unit.score(path, url, log_level).await,
+            BusFactor(unit) => unit.score(path, url).await,
         }
     }
 }

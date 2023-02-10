@@ -3,12 +3,20 @@ mod controller;
 mod log;
 
 use log::LogLevel;
-use std::error::Error;
+
+use std::{
+    error::Error,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use tokio::task;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    log::log(LogLevel::All, LogLevel::Minimal, "Starting program...");
+    log::log(LogLevel::Minimal, "Starting program...");
+    let start_time = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
 
     let urls = [
         "https://github.com/facebook/react",
@@ -26,16 +34,19 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         println!("{}", score??);
     }
 
+    log::log(
+        LogLevel::Minimal,
+        &format!("Done with run started at {start_time}"),
+    );
+
     Ok(())
 }
 
 async fn fetch_repo_run_scores(
     url: &str,
 ) -> Result<controller::Scores, Box<dyn Error + Send + Sync>> {
-    let repo = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
-    let path = repo.path();
+    let (repo_local, repo_name) = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
+    let path = repo_local.path();
 
-    log::log(LogLevel::All, LogLevel::All, &format!("{path:?}"));
-
-    controller::run_metrics(path, url, &controller::Metrics::all(), LogLevel::All).await
+    controller::run_metrics(path, &repo_name, &controller::Metrics::all()).await
 }

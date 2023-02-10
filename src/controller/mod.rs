@@ -1,13 +1,12 @@
 mod bus_factor;
 
-pub mod scores;
+mod scores;
 pub use scores::Scores;
 
-pub mod metrics;
+mod metrics;
 pub use metrics::Metrics;
 
-use crate::log;
-use crate::log::LogLevel;
+use crate::{api::fetch::GithubRepositoryName, log, log::LogLevel};
 
 use async_trait::async_trait;
 use futures::future::join_all;
@@ -19,8 +18,7 @@ trait Scorer {
     async fn score<P: AsRef<Path> + Send>(
         &self,
         path: P,
-        url: &str,
-        log_level: LogLevel,
+        url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>>;
 }
 
@@ -44,28 +42,19 @@ pub enum ControllerError {
 /// bewteen threads. The docs imply this is possible, but the type does not implement `Sync`.
 pub async fn run_metrics<P: AsRef<Path> + Sync>(
     path: P,
-    url: &str,
+    url: &GithubRepositoryName,
     to_run: &Metrics,
-    log_level: LogLevel,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
-    log::log(
-        log_level,
-        LogLevel::Minimal,
-        &format!("Starting analysis for {url}"),
-    );
+    log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));
 
     Ok(calculate_net_scores(Scores {
         url: url.to_string(),
-        scores: join_all(
-            to_run
-                .iter()
-                .map(|metric| metric.score(&path, url, log_level)),
-        )
-        .await
-        .into_iter()
-        .zip(to_run.iter())
-        .map(|(score, metric)| Ok((*metric, score?)))
-        .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
+        scores: join_all(to_run.iter().map(|metric| metric.score(&path, url)))
+            .await
+            .into_iter()
+            .zip(to_run.iter())
+            .map(|(score, metric)| Ok((*metric, score?)))
+            .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
         ..Scores::default()
     }))
 }

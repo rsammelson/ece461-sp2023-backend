@@ -15,11 +15,9 @@ impl Scorer for BusFactor {
     async fn score<P: AsRef<Path> + Send>(
         &self,
         path: P,
-        url: &str,
-        log_level: LogLevel,
+        url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         log::log(
-            log_level,
             LogLevel::All,
             &format!("Starting to analyze BusFactor for {url}"),
         );
@@ -60,7 +58,6 @@ impl Scorer for BusFactor {
         let repo_normalized_committers = authors.values().sum::<f64>() / max;
 
         log::log(
-            log_level,
             LogLevel::All,
             &format!("Done analyzing BusFactor for {url}"),
         );
