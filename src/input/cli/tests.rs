@@ -69,3 +69,19 @@ fn test_set_args() {
 
     assert!(stdout.contains(&format!("{weights}")));
 }
+
+#[tokio::test]
+async fn exec_program() {
+    let result = crate::run_backend(
+        ["name_of_executable", "-t", "tests/input-urls"]
+            .into_iter()
+            .map(|str| str.to_string()),
+    )
+    .await;
+
+    // should return Ok(()) after printing out weights and urls
+    assert!(match result {
+        Ok(_) => true,
+        _ => false,
+    });
+}

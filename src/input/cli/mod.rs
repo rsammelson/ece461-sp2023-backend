@@ -41,8 +41,11 @@ pub enum CliError {
 }
 
 // This function is used to parse the arguments from the command line
-pub fn get_inputs() -> Result<(Weights, Urls, TestMode), Box<dyn Error + Send + Sync>> {
-    let args = Cli::parse();
+pub fn get_inputs<I>(args: I) -> Result<(Weights, Urls, TestMode), Box<dyn Error + Send + Sync>>
+where
+    I: Iterator<Item = String>,
+{
+    let args = Cli::parse_from(args);
 
     let weights = Weights {
         bus_factor: args.bus_factor,
