@@ -9,12 +9,12 @@ impl Scorer for Responsiveness {
         &self,
         _repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
-    ) -> Result<f64, Box<dyn Error + Send + Sync>> {
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
         log::log(
             LogLevel::All,
             &format!("Starting to analyze Responsiveness for {url}"),
         );
 
-        Ok(0.)
+        Ok((Metric::Responsiveness(Responsiveness()), -1.))
     }
 }

@@ -177,3 +177,33 @@ pub async fn url_to_repo_name(
         ))),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api::fetch::url_conversion::url_to_repo_name;
+
+    #[tokio::test]
+    async fn github_https_repo_convert() {
+        let url = "https://github.com/facebook/react";
+        let url = url::Url::parse(&url).unwrap();
+        let repo = url_to_repo_name(url).await.unwrap();
+        assert_eq!("facebook/react", format!("{repo}"));
+    }
+
+    #[tokio::test]
+    async fn githuh_git_repo_convert() {
+        let url = "git://github.com/jonschlinkert/even.git";
+        let url = url::Url::parse(&url).unwrap();
+        let repo = url_to_repo_name(url).await.unwrap();
+        assert_eq!("jonschlinkert/even", format!("{repo}"));
+    }
+
+    // mock npm api response
+    // #[tokio::test]
+    // async fn npm_https_repo_convert() {
+    //     let url = "https://www.npmjs.com/package/react-scripts";
+    //     let url = url::Url::parse(&url).unwrap();
+    //     let repo = url_to_repo_name(url).await.unwrap();
+    //     assert_eq!("facebook/create-react-app", format!("{repo}"));
+    // }
+}
