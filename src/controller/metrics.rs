@@ -17,7 +17,6 @@ pub enum Metric {
     LicenseCompatibility(license_compatibility::LicenseCompatibility),
 }
 
-
 #[async_trait]
 impl Scorer for Metric {
     async fn score<P: AsRef<Path> + Send>(
@@ -39,36 +38,12 @@ impl Scorer for Metric {
 impl Display for Metric {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Metric::BusFactor(_) => write!(f, "BusFactor"),
-            Metric::Correctness(_) => write!(f, "Correctness"),
-            Metric::RampUpTime(_) => write!(f, "RampUpTime"),
-            Metric::Responsiveness(_) => write!(f, "Responsiveness"),
-            Metric::LicenseCompatibility(_) => write!(f, "LicenseCompatibility"),
+            Metric::BusFactor(_) => write!(f, "BUS_FACTOR_SCORE"),
+            Metric::Correctness(_) => write!(f, "CORRECTNESS_SCORE"),
+            Metric::RampUpTime(_) => write!(f, "RAMP_UP_SCORE"),
+            Metric::Responsiveness(_) => write!(f, "RESPONSIVENESS_SCORE"),
+            Metric::LicenseCompatibility(_) => write!(f, "LICENSE_SCORE"),
         }
-    }
-}
-
-impl FromStr for Metric {
-    type Err = ControllerError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use Metric::*;
-        match s {
-            "BusFactor" => Ok(BusFactor(bus_factor::BusFactor())),
-            "Correctness" => Ok(Correctness(correctness::Correctness())),
-            "RampUpTime" => Ok(RampUpTime(ramp_up_time::RampUpTime())),
-            "Responsiveness" => Ok(Responsiveness(responsiveness::Responsiveness())),
-            "LicenseCompatibility" => Ok(LicenseCompatibility(
-                license_compatibility::LicenseCompatibility(),
-            )),
-            _ => Err(ControllerError::MetricParseError(s.to_string())),
-        }
-    }
-}
-
-impl TryFrom<&str> for Metric {
-    type Error = ControllerError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::from_str(value)
     }
 }
 
@@ -83,17 +58,6 @@ impl Metrics {
             Metric::Responsiveness(responsiveness::Responsiveness()),
             Metric::LicenseCompatibility(license_compatibility::LicenseCompatibility()),
         ])
-    }
-}
-
-impl TryFrom<Vec<&str>> for Metrics {
-    type Error = ControllerError;
-    fn try_from(value: Vec<&str>) -> Result<Self, Self::Error> {
-        let ret = value
-            .iter()
-            .map(|it| (*it).try_into())
-            .collect::<Result<Vec<Metric>, ControllerError>>()?;
-        Ok(Metrics(ret))
     }
 }
 

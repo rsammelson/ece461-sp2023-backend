@@ -8,14 +8,14 @@ mod scores;
 pub use scores::Scores;
 
 mod metrics;
+pub use metrics::Metric;
 pub use metrics::Metrics;
 
 use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
-use metrics::Metric;
 
 use async_trait::async_trait;
 use futures::future::join_all;
-use std::{collections::HashMap, error::Error, path::Path, str::FromStr, sync::Arc};
+use std::{collections::HashMap, error::Error, path::Path, sync::Arc};
 
 #[async_trait]
 /// The trait that defines scoring algorithms
@@ -25,12 +25,6 @@ trait Scorer {
         path: P,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>>;
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum ControllerError {
-    #[error("Do not know the `{0}` metric")]
-    MetricParseError(String),
 }
 
 /// Run a set of scoring metrics and collect the results
@@ -49,7 +43,7 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
     path: P,
     url: &GithubRepositoryName,
     to_run: Arc<Metrics>,
-    weights: Arc<crate::input::Weights>,
+    weights: Arc<input::Weights>,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));
 
@@ -68,29 +62,28 @@ pub async fn run_metrics<P: AsRef<Path> + Sync>(
     ))
 }
 
-fn calculate_net_scores(scoreset: Scores, weightset: Arc<input::Weights>) -> Scores {
+fn calculate_net_scores(scores: Scores, weights: Arc<input::Weights>) -> Scores {
     let mut sum = 0.;
-    let mut weightsum = 0.;
-    for (metric, score) in scoreset.scores.iter() {
-        let weightvar = match metric {
-            Metric::BusFactor(_) => weightset.bus_factor,
-            Metric::Correctness(_) => weightset.correctness_factor,
-            Metric::RampUpTime(_) => weightset.ramp_up_time,
-            Metric::Responsiveness(_) => weightset.responsiveness,
-            Metric::LicenseCompatibility(_) => weightset.license_compatibility,
+    let mut weight_sum = 0.;
+    for (metric, score) in scores.scores.iter() {
+        let weight = match metric {
+            Metric::BusFactor(_) => weights.bus_factor,
+            Metric::Correctness(_) => weights.correctness_factor,
+            Metric::RampUpTime(_) => weights.ramp_up_time,
+            Metric::Responsiveness(_) => weights.responsiveness,
+            Metric::LicenseCompatibility(_) => weights.license_compatibility,
         };
 
-        sum += score * weightvar;
-        weightsum += weightvar;
+        sum += score * weight;
+        weight_sum += weight;
     }
 
-
-    if weightsum > 0. {
-        sum /= weightsum;
+    if weight_sum > 0. {
+        sum /= weight_sum;
     }
 
     Scores {
         net_score: sum,
-        ..scoreset
+        ..scores
     }
 }
