@@ -1,9 +1,18 @@
+#[cfg(test)]
+mod tests;
+
 use crate::controller::*;
 
-use std::{
-    collections::HashMap,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::{collections::HashMap, time::UNIX_EPOCH};
+
+struct SystemTime();
+
+#[automock]
+impl SystemTime {
+    fn now() -> std::time::SystemTime {
+        std::time::SystemTime::now()
+    }
+}
 
 const YEAR_SECS: u64 = 60 * 60 * 24 * 365;
 
@@ -23,6 +32,7 @@ impl Scorer for BusFactor {
         );
 
         let repo = repo.lock().await;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
         let mut walk = repo.revwalk()?;
         walk.set_sorting(git2::Sort::TIME)?;
@@ -36,7 +46,6 @@ impl Scorer for BusFactor {
             let commit = repo.find_commit(oid)?;
 
             let commit_time = commit.time().seconds() as u64;
-            let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
             if now - commit_time > YEAR_SECS {
                 break;
             }
@@ -107,35 +116,4 @@ fn score_commit(added: usize) -> f64 {
 
 fn sigmoid(x: f64) -> f64 {
     1. / (1. + (-x).exp())
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::controller::bus_factor::score_commit;
-
-    #[test]
-    fn score_commit_zero() {
-        assert_eq!(score_commit(0), 0.);
-    }
-
-    #[test]
-    fn score_commit_small() {
-        let score = score_commit(50);
-        assert!(0.1 < score);
-        assert!(score < 0.2);
-    }
-
-    #[test]
-    fn score_commit_normal() {
-        let score = score_commit(100);
-        assert!(0.4 < score);
-        assert!(score < 0.5);
-    }
-
-    #[test]
-    fn score_commit_large() {
-        let score = score_commit(300);
-        assert!(0.9 < score);
-        assert!(score < 1.);
-    }
 }

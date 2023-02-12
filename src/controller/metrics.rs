@@ -47,7 +47,7 @@ impl Display for Metric {
     }
 }
 
-pub struct Metrics(Vec<Metric>);
+pub struct Metrics(pub Vec<Metric>);
 
 impl Metrics {
     pub fn all() -> Self {

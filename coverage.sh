@@ -28,13 +28,17 @@ if [ "$1" == "show" ] ; then
         $(print_files) \
         --instr-profile="$profdata" \
         --ignore-filename-regex='/.cargo/registry' \
+        --ignore-filename-regex='tests.rs' \
+        --ignore-filename-regex='rustc' \
         --use-color  --Xdemangler=rustfilt
 
 else
     llvm-cov report \
         $(print_files) \
         --instr-profile="$profdata" \
-        --ignore-filename-regex=/.cargo/registry \
+        --ignore-filename-regex='/.cargo/registry' \
+        --ignore-filename-regex='tests.rs' \
+        --ignore-filename-regex='rustc' \
         --show-region-summary=false --show-branch-summary=false \
         --use-color \
         | less -SEXIER

@@ -36,28 +36,3 @@ impl Display for Scores {
         Ok(())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn score_display_format_simple() {
-        use crate::{
-            api::GithubRepositoryName,
-            controller::{bus_factor, Metric, Scores},
-        };
-        let result = Scores {
-            url: GithubRepositoryName {
-                owner: "user".to_string(),
-                name: "project".to_string(),
-            },
-            net_score: 0.8,
-            scores: vec![(Metric::BusFactor(bus_factor::BusFactor()), 0.3)]
-                .into_iter()
-                .collect(),
-        };
-        assert_eq!(
-            format!("{}", result),
-            r#"{"URL": "https://github.com/user/project", "NET_SCORE": 0.800, "BUS_FACTOR_SCORE": 0.300}"#
-        );
-    }
-}
