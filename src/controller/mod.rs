@@ -39,7 +39,7 @@ trait Scorer {
 /// Returns `Err()` iff any of the metric calculations return `Err()`
 pub async fn run_metrics(
     repo: &Mutex<git2::Repository>,
-    url: &GithubRepositoryName,
+    url: GithubRepositoryName,
     to_run: Arc<Metrics>,
     weights: Arc<input::Weights>,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
@@ -47,8 +47,7 @@ pub async fn run_metrics(
 
     Ok(calculate_net_scores(
         Scores {
-            url: url.to_string(),
-            scores: join_all(to_run.iter().map(|metric| metric.score(repo, url)))
+            scores: join_all(to_run.iter().map(|metric| metric.score(repo, &url)))
                 .await
                 .into_iter()
                 // this silliness is because `metric.score()` is a future, but `metric` is not
@@ -56,6 +55,7 @@ pub async fn run_metrics(
                 // this just reorders the tuple while propogating errors upwards
                 .map(|(score, metric)| Ok((*metric, score?)))
                 .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
+            url,
             ..Scores::default()
         },
         weights,

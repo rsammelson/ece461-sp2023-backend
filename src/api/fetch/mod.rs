@@ -20,6 +20,12 @@ impl Display for GithubRepositoryName {
     }
 }
 
+impl GithubRepositoryName {
+    pub fn as_url(&self) -> String {
+        format!("https://github.com/{}/{}", self.owner, self.name)
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum RepositoryCreationError {
     #[error("Error while getting repository: `{0}`")]
