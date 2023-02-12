@@ -1,39 +1,55 @@
+#[cfg(test)]
+mod tests;
+
 use crate::input::{Urls, Weights};
+
 use clap::Parser;
-use std::error::Error;
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::{
+    error::Error,
+    fs::File,
+    io::{self, BufRead},
+    path::Path,
+};
 
 #[derive(Parser)]
 pub struct Cli {
     // This sets the Cli struct as well as how to address the variable flags
     pattern: String,
     #[clap(short = 'b', long = "busFactor", default_value = "1")]
-    bus_factor: Option<f64>,
+    bus_factor: f64,
     #[clap(short = 'c', long = "correctness", default_value = "1")]
-    correctness_factor: Option<f64>,
-    #[clap(short = 't', long = "rampUpTime", default_value = "1")]
-    ramp_up_time: Option<f64>,
+    correctness_factor: f64,
+    #[clap(short = 'u', long = "rampUpTime", default_value = "1")]
+    ramp_up_time: f64,
     #[clap(short = 'r', long = "responsiveness", default_value = "1")]
-    responsiveness: Option<f64>,
+    responsiveness: f64,
     #[clap(short = 'l', long = "licenseCompatibility", default_value = "1")]
-    license_compatibility: Option<f64>,
-    #[clap(short = 'd', long = "disableTests", default_value = "false")]
-    disable_tests: Option<bool>,
+    license_compatibility: f64,
+    #[clap(short = 't', long = "test", default_value = "false")]
+    test_mode: bool,
+}
+
+pub enum TestMode {
+    Test,
+    Normal,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum CliError {
+    #[error("Could not open `{0}` because \"{1}\"")]
+    FileOpenError(String, io::Error),
 }
 
 // This function is used to parse the arguments from the command line
-pub fn get_inputs() -> Result<(Weights, Urls), Box<dyn Error + Send + Sync>> {
+pub fn get_inputs() -> Result<(Weights, Urls, TestMode), Box<dyn Error + Send + Sync>> {
     let args = Cli::parse();
 
-    // This assigns the weights to the variables. the unwrap_or(1) sets a default weight
     let weights = Weights {
-        bus_factor: args.bus_factor.unwrap_or(1.),
-        correctness_factor: args.correctness_factor.unwrap_or(1.),
-        ramp_up_time: args.ramp_up_time.unwrap_or(1.),
-        responsiveness: args.responsiveness.unwrap_or(1.),
-        license_compatibility: args.license_compatibility.unwrap_or(1.),
+        bus_factor: args.bus_factor,
+        correctness_factor: args.correctness_factor,
+        ramp_up_time: args.ramp_up_time,
+        responsiveness: args.responsiveness,
+        license_compatibility: args.license_compatibility,
     };
 
     Ok((
@@ -41,13 +57,21 @@ pub fn get_inputs() -> Result<(Weights, Urls), Box<dyn Error + Send + Sync>> {
         Urls {
             urls: read_lines(args.pattern)?,
         },
+        if args.test_mode {
+            TestMode::Test
+        } else {
+            TestMode::Normal
+        },
     ))
 }
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+fn read_lines<P>(
+    filename: P,
+) -> Result<io::Lines<io::BufReader<File>>, Box<dyn Error + Send + Sync>>
 where
-    P: AsRef<Path>,
+    P: AsRef<Path> + Clone + Into<String>,
 {
-    let file = File::open(filename)?;
+    let file = File::open(&filename)
+        .map_err(|file_error| CliError::FileOpenError(filename.clone().into(), file_error))?;
     Ok(io::BufReader::new(file).lines())
 }

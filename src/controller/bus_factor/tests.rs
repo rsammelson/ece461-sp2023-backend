@@ -36,7 +36,7 @@ async fn multiple_commits_better() {
     let metrics = Metrics(vec![Metric::BusFactor(BusFactor())]);
     let weights = Arc::new(Weights {
         bus_factor: 1.,
-        ..Weights::default()
+        ..Weights::new()
     });
 
     let multiple_commits_repo =
