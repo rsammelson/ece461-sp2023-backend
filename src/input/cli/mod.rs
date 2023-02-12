@@ -1,5 +1,6 @@
 use crate::input::{Urls, Weights};
 use clap::Parser;
+use std::error::Error;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -23,7 +24,7 @@ pub struct Cli {
 }
 
 // This function is used to parse the arguments from the command line
-pub fn get_inputs() -> (Weights, Urls) {
+pub fn get_inputs() -> Result<(Weights, Urls), Box<dyn Error + Send + Sync>> {
     let args = Cli::parse();
 
     // This assigns the weights to the variables. the unwrap_or(1) sets a default weight
@@ -35,22 +36,12 @@ pub fn get_inputs() -> (Weights, Urls) {
         license_compatibility: args.license_compatibility.unwrap_or(1.),
     };
 
-    // URLs are stored in a vector so this reads the lines and stores them into the vector
-    let mut urls = Urls::new();
-    if let Ok(lines) = read_lines(args.pattern) {
-        for line in lines {
-            match line {
-                Ok(str) => {
-                    if !str.is_empty() {
-                        urls.urls.push(str);
-                    }
-                }
-                Err(e) => println!("Encountered an error reading the file: {e}"),
-            }
-        }
-    }
-
-    (weights, urls)
+    Ok((
+        weights,
+        Urls {
+            urls: read_lines(args.pattern)?,
+        },
+    ))
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>

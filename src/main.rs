@@ -24,15 +24,15 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .unwrap()
         .as_secs();
 
-    let (weights, urls) = input::cli::get_inputs();
+    let (weights, urls) = input::cli::get_inputs()?;
 
     let metrics = Arc::new(Metrics::all());
     let weights = Arc::new(weights);
 
     let mut tasks = task::JoinSet::new();
-    for url in urls.urls {
+    for url in urls {
         tasks.spawn(fetch_repo_run_scores(
-            url,
+            url?,
             Arc::clone(&metrics),
             Arc::clone(&weights),
         ));

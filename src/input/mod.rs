@@ -1,5 +1,7 @@
 pub mod cli;
 
+use std::{fs::File, io};
+
 pub struct Weights {
     pub bus_factor: f64,
     pub correctness_factor: f64,
@@ -9,7 +11,15 @@ pub struct Weights {
 }
 
 pub struct Urls {
-    pub urls: Vec<String>,
+    urls: io::Lines<io::BufReader<File>>,
+}
+
+impl Iterator for Urls {
+    type Item = io::Result<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.urls.next()
+    }
 }
 
 impl Weights {
@@ -25,18 +35,6 @@ impl Weights {
 }
 
 impl Default for Weights {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Urls {
-    pub fn new() -> Self {
-        Urls { urls: Vec::new() }
-    }
-}
-
-impl Default for Urls {
     fn default() -> Self {
         Self::new()
     }
