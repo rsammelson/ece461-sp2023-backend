@@ -1,4 +1,5 @@
 pub mod fetch;
+pub use fetch::GithubRepositoryName;
 
 use reqwest::{Client, ClientBuilder};
 use std::error::Error;
