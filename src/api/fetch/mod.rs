@@ -154,3 +154,26 @@ fn get_remote<'repo>(
     }
     Ok((remote.unwrap(), remote_name.unwrap()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::GithubRepositoryName;
+
+    #[test]
+    fn github_repository_name_display() {
+        let repo = GithubRepositoryName {
+            owner: "owner".to_string(),
+            name: "project".to_string(),
+        };
+        assert_eq!("owner/project", format!("{repo}"));
+    }
+
+    #[test]
+    fn github_repository_name_url() {
+        let repo = GithubRepositoryName {
+            owner: "owner".to_string(),
+            name: "project".to_string(),
+        };
+        assert_eq!("https://github.com/owner/project", repo.as_url());
+    }
+}

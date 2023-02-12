@@ -16,7 +16,7 @@ impl Scorer for BusFactor {
         &self,
         repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
-    ) -> Result<f64, Box<dyn Error + Send + Sync>> {
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
         log::log(
             LogLevel::All,
             &format!("Starting to analyze BusFactor for {url}"),
@@ -62,7 +62,10 @@ impl Scorer for BusFactor {
             &format!("Done analyzing BusFactor for {url}"),
         );
 
-        Ok(score_normalized_committers(repo_normalized_committers))
+        Ok((
+            Metric::BusFactor(BusFactor()),
+            score_normalized_committers(repo_normalized_committers),
+        ))
     }
 }
 
@@ -104,4 +107,35 @@ fn score_commit(added: usize) -> f64 {
 
 fn sigmoid(x: f64) -> f64 {
     1. / (1. + (-x).exp())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::controller::bus_factor::score_commit;
+
+    #[test]
+    fn score_commit_zero() {
+        assert_eq!(score_commit(0), 0.);
+    }
+
+    #[test]
+    fn score_commit_small() {
+        let score = score_commit(50);
+        assert!(0.1 < score);
+        assert!(score < 0.2);
+    }
+
+    #[test]
+    fn score_commit_normal() {
+        let score = score_commit(100);
+        assert!(0.4 < score);
+        assert!(score < 0.5);
+    }
+
+    #[test]
+    fn score_commit_large() {
+        let score = score_commit(300);
+        assert!(0.9 < score);
+        assert!(score < 1.);
+    }
 }

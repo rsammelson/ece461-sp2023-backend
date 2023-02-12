@@ -23,7 +23,7 @@ impl Scorer for Metric {
         &self,
         repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
-    ) -> Result<f64, Box<dyn Error + Send + Sync>> {
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
         use Metric::*;
         match self {
             BusFactor(unit) => unit.score(repo, url).await,
@@ -41,7 +41,7 @@ impl Display for Metric {
             Metric::BusFactor(_) => write!(f, "BUS_FACTOR_SCORE"),
             Metric::Correctness(_) => write!(f, "CORRECTNESS_SCORE"),
             Metric::RampUpTime(_) => write!(f, "RAMP_UP_SCORE"),
-            Metric::Responsiveness(_) => write!(f, "RESPONSIVENESS_SCORE"),
+            Metric::Responsiveness(_) => write!(f, "RESPONSIVE_MAINTAINER_SCORE"),
             Metric::LicenseCompatibility(_) => write!(f, "LICENSE_SCORE"),
         }
     }

@@ -62,5 +62,5 @@ async fn fetch_repo_run_scores(
     )
     .await?;
 
-    controller::run_metrics(&Mutex::new(repo_local), repo_name, metrics, weights).await
+    controller::run_metrics(&Mutex::new(repo_local), repo_name, metrics.iter(), weights).await
 }
