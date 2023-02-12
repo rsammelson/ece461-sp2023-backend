@@ -8,8 +8,7 @@ mod scores;
 pub use scores::Scores;
 
 mod metrics;
-pub use metrics::Metric;
-pub use metrics::Metrics;
+pub use metrics::{Metric, Metrics};
 
 use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
 
@@ -32,14 +31,12 @@ trait Scorer {
 ///
 /// Arguments:
 ///
-/// * `path`: File path to the root of a locally cloned git repository
-/// * `url`: Some object to use for API requests. Also used as the "name" of the project
+/// * `repo`: Object representing on-disk git repository
+/// * `url`: Object to use for API requests.
 /// * `to_run`: A list of `Metric`s to run on the repository.
 /// * `log_level`: Passed to each metric to use for logging
 ///
-/// TODO: see if having each metric open its own Repository is slower than running in sequence
-/// with the same object. Alternatively, figure out how to share the Repository object
-/// bewteen threads. The docs imply this is possible, but the type does not implement `Sync`.
+/// Returns `Err()` iff any of the metric calculations return `Err()`
 pub async fn run_metrics(
     repo: &Mutex<git2::Repository>,
     url: &GithubRepositoryName,
@@ -54,7 +51,9 @@ pub async fn run_metrics(
             scores: join_all(to_run.iter().map(|metric| metric.score(repo, url)))
                 .await
                 .into_iter()
+                // this silliness is because `metric.score()` is a future, but `metric` is not
                 .zip(to_run.iter())
+                // this just reorders the tuple while propogating errors upwards
                 .map(|(score, metric)| Ok((*metric, score?)))
                 .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
             ..Scores::default()
@@ -64,27 +63,29 @@ pub async fn run_metrics(
 }
 
 fn calculate_net_scores(scores: Scores, weights: Arc<input::Weights>) -> Scores {
-    let mut sum = 0.;
-    let mut weight_sum = 0.;
-    for (metric, score) in scores.scores.iter() {
-        let weight = match metric {
-            Metric::BusFactor(_) => weights.bus_factor,
-            Metric::Correctness(_) => weights.correctness_factor,
-            Metric::RampUpTime(_) => weights.ramp_up_time,
-            Metric::Responsiveness(_) => weights.responsiveness,
-            Metric::LicenseCompatibility(_) => weights.license_compatibility,
-        };
-
-        sum += score * weight;
-        weight_sum += weight;
-    }
-
-    if weight_sum > 0. {
-        sum /= weight_sum;
-    }
+    let (score_sum, weight_sum) = scores
+        .scores
+        .iter()
+        .map(|(metric, score)| {
+            let weight = match metric {
+                Metric::BusFactor(_) => weights.bus_factor,
+                Metric::Correctness(_) => weights.correctness_factor,
+                Metric::RampUpTime(_) => weights.ramp_up_time,
+                Metric::Responsiveness(_) => weights.responsiveness,
+                Metric::LicenseCompatibility(_) => weights.license_compatibility,
+            };
+            (score * weight, weight)
+        })
+        .fold((0., 0.), |(score_sum, weight_sum), (score, weight)| {
+            (score_sum + score, weight_sum + weight)
+        });
 
     Scores {
-        net_score: sum,
+        net_score: if weight_sum != 0. {
+            score_sum / weight_sum
+        } else {
+            0.
+        },
         ..scores
     }
 }
