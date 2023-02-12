@@ -17,11 +17,10 @@ use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
 
 use async_trait::async_trait;
 use futures::future::join_all;
-use mockall::automock;
 use std::{collections::HashMap, error::Error, sync::Arc};
 use tokio::sync::Mutex;
 
-#[automock]
+#[cfg_attr(test, mockall::automock)]
 #[async_trait]
 /// The trait that defines scoring algorithms
 pub trait Scorer {

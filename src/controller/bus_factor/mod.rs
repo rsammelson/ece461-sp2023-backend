@@ -3,15 +3,22 @@ mod tests;
 
 use crate::controller::*;
 
-use std::{collections::HashMap, time::UNIX_EPOCH};
+use std::collections::HashMap;
 
-struct SystemTime();
+#[cfg(not(test))]
+fn now() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
 
-#[automock]
-impl SystemTime {
-    fn now() -> std::time::SystemTime {
-        std::time::SystemTime::now()
-    }
+// if in test mode, freeze time
+// the test repositories have commits slightly before this time
+// don't want tests to break after a year passes because all the commits are too old
+#[cfg(test)]
+fn now() -> u64 {
+    1676211568u64
 }
 
 const YEAR_SECS: u64 = 60 * 60 * 24 * 365;
@@ -32,7 +39,10 @@ impl Scorer for BusFactor {
         );
 
         let repo = repo.lock().await;
-        let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+
+        // this silliness because the mocking library doesn't like
+        // having a function with no arguments
+        let now = now();
 
         let mut walk = repo.revwalk()?;
         walk.set_sorting(git2::Sort::TIME)?;
