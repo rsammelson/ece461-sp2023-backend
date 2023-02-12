@@ -1,6 +1,6 @@
 pub mod cli;
 
-use std::{fs::File, io};
+use std::{fmt::Display, fs::File, io};
 
 pub struct Weights {
     pub bus_factor: f64,
@@ -22,6 +22,7 @@ impl Iterator for Urls {
     }
 }
 
+#[cfg(test)]
 impl Weights {
     pub fn new() -> Self {
         Weights {
@@ -36,6 +37,23 @@ impl Weights {
 
 impl Default for Weights {
     fn default() -> Self {
-        Self::new()
+        Weights {
+            bus_factor: 1.,
+            correctness_factor: 1.,
+            ramp_up_time: 1.,
+            responsiveness: 1.,
+            license_compatibility: 1.,
+        }
+    }
+}
+
+impl Display for Weights {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "BUS_FACTOR_WEIGHT: {}", self.bus_factor)?;
+        writeln!(f, "CORRECTNESS_WEIGHT: {}", self.correctness_factor)?;
+        writeln!(f, "RAMP_UP_WEIGHT: {}", self.ramp_up_time)?;
+        writeln!(f, "RESPONSIVE_MAINTAINER_WEIGHT: {}", self.responsiveness)?;
+        write!(f, "LICENSE_WEIGHT: {}", self.license_compatibility)?;
+        Ok(())
     }
 }
