@@ -11,15 +11,11 @@ use crate::controller::*;
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Metric {
     BusFactor(bus_factor::BusFactor),
-    CorrectnessFactor,
-    RampUpTime,
-    Responsiveness,
-    LicenseCompatibility,
+    Correctness(correctness::Correctness),
+    RampUpTime(ramp_up_time::RampUpTime),
+    Responsiveness(responsiveness::Responsiveness),
+    LicenseCompatibility(license_compatibility::LicenseCompatibility),
 }
-//CorrectnessFactor(correctness_factor::CorrectnessFactor),
-//RampUpTime(ramp_up_time::RampUpTime),
-//Responsiveness(responsiveness::Responsiveness),
-//LicenseCompatibility(license_compatibility::LicenseCompatibility),
 
 
 #[async_trait]
@@ -32,7 +28,10 @@ impl Scorer for Metric {
         use Metric::*;
         match self {
             BusFactor(unit) => unit.score(path, url).await,
-            _ => Ok(-1.),
+            Correctness(unit) => unit.score(path, url).await,
+            RampUpTime(unit) => unit.score(path, url).await,
+            Responsiveness(unit) => unit.score(path, url).await,
+            LicenseCompatibility(unit) => unit.score(path, url).await,
         }
     }
 }
@@ -41,10 +40,10 @@ impl Display for Metric {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Metric::BusFactor(_) => write!(f, "BusFactor"),
-            Metric::CorrectnessFactor => write!(f, "CorrectnessFactor"),
-            Metric::RampUpTime => write!(f, "RampUpTime"),
-            Metric::Responsiveness => write!(f, "Responsiveness"),
-            Metric::LicenseCompatibility => write!(f, "LicenseCompatibility"),
+            Metric::Correctness(_) => write!(f, "Correctness"),
+            Metric::RampUpTime(_) => write!(f, "RampUpTime"),
+            Metric::Responsiveness(_) => write!(f, "Responsiveness"),
+            Metric::LicenseCompatibility(_) => write!(f, "LicenseCompatibility"),
         }
     }
 }
@@ -55,11 +54,12 @@ impl FromStr for Metric {
         use Metric::*;
         match s {
             "BusFactor" => Ok(BusFactor(bus_factor::BusFactor())),
-            //below commented out lines to accomodate for the fact that the other metrics are not programmed yet.
-            //"CorrectnessFactor" => Ok(CorrectnessFactor(correctness_factor::CorrectnessFactor())),
-            //"RampUpTime" => Ok(RampUpTime(ramp_up_time::RampUpTime())),
-            //"Responsiveness" => Ok(Responsiveness(responsiveness::Responsiveness())),
-            //"LicenseCompatibility" => Ok(LicenseCompatibility(license_compatibility::LicenseCompatibility())),
+            "Correctness" => Ok(Correctness(correctness::Correctness())),
+            "RampUpTime" => Ok(RampUpTime(ramp_up_time::RampUpTime())),
+            "Responsiveness" => Ok(Responsiveness(responsiveness::Responsiveness())),
+            "LicenseCompatibility" => Ok(LicenseCompatibility(
+                license_compatibility::LicenseCompatibility(),
+            )),
             _ => Err(ControllerError::MetricParseError(s.to_string())),
         }
     }
@@ -76,11 +76,13 @@ pub struct Metrics(Vec<Metric>);
 
 impl Metrics {
     pub fn all() -> Self {
-        Metrics(vec![Metric::BusFactor(bus_factor::BusFactor()), Metric::CorrectnessFactor, Metric::RampUpTime, Metric::Responsiveness, Metric::LicenseCompatibility])
-        //Metrics(vec![Metric::CorrectnessFactor(correctness_factor::CorrectnessFactor())])
-        //Metrics(vec![Metric::RampUpTime(ramp_up_time::RampUpTime())])
-        //Metrics(vec![Metric::Responsiveness(responsiveness::Responsiveness())])
-        //Metrics(vec![Metric::LicenseCompatibility(license_compatibility::LicenseCompatibility())])
+        Metrics(vec![
+            Metric::BusFactor(bus_factor::BusFactor()),
+            Metric::Correctness(correctness::Correctness()),
+            Metric::RampUpTime(ramp_up_time::RampUpTime()),
+            Metric::Responsiveness(responsiveness::Responsiveness()),
+            Metric::LicenseCompatibility(license_compatibility::LicenseCompatibility()),
+        ])
     }
 }
 

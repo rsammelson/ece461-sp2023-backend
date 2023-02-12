@@ -1,8 +1,8 @@
 mod bus_factor;
-//mod correctness_factor;
-//mod ramp_up_time;
-//mod responsiveness;
-//mod license_compatibility;
+mod correctness;
+mod license_compatibility;
+mod ramp_up_time;
+mod responsiveness;
 
 mod scores;
 pub use scores::Scores;
@@ -74,10 +74,10 @@ fn calculate_net_scores(scoreset: Scores, weightset: Arc<input::Weights>) -> Sco
     for (metric, score) in scoreset.scores.iter() {
         let weightvar = match metric {
             Metric::BusFactor(_) => weightset.bus_factor,
-            Metric::CorrectnessFactor => weightset.correctness_factor,
-            Metric::RampUpTime => weightset.ramp_up_time,
-            Metric::Responsiveness => weightset.responsiveness,
-            Metric::LicenseCompatibility => weightset.license_compatibility,
+            Metric::Correctness(_) => weightset.correctness_factor,
+            Metric::RampUpTime(_) => weightset.ramp_up_time,
+            Metric::Responsiveness(_) => weightset.responsiveness,
+            Metric::LicenseCompatibility(_) => weightset.license_compatibility,
         };
 
         sum += score * weightvar;
