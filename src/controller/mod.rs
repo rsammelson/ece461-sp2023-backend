@@ -1,16 +1,21 @@
 mod bus_factor;
+mod correctness;
+mod license_compatibility;
+mod ramp_up_time;
+mod responsiveness;
 
 mod scores;
 pub use scores::Scores;
 
 mod metrics;
+pub use metrics::Metric;
 pub use metrics::Metrics;
 
-use crate::{api::fetch::GithubRepositoryName, log, log::LogLevel};
+use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
 
 use async_trait::async_trait;
 use futures::future::join_all;
-use std::{collections::HashMap, error::Error, path::Path, str::FromStr};
+use std::{collections::HashMap, error::Error, path::Path, sync::Arc};
 
 #[async_trait]
 /// The trait that defines scoring algorithms
@@ -20,12 +25,6 @@ trait Scorer {
         path: P,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>>;
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum ControllerError {
-    #[error("Do not know the `{0}` metric")]
-    MetricParseError(String),
 }
 
 /// Run a set of scoring metrics and collect the results
@@ -43,28 +42,44 @@ pub enum ControllerError {
 pub async fn run_metrics<P: AsRef<Path> + Sync>(
     path: P,
     url: &GithubRepositoryName,
-    to_run: &Metrics,
+    to_run: Arc<Metrics>,
+    weights: Arc<input::Weights>,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>> {
     log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));
 
-    Ok(calculate_net_scores(Scores {
-        url: url.to_string(),
-        scores: join_all(to_run.iter().map(|metric| metric.score(&path, url)))
-            .await
-            .into_iter()
-            .zip(to_run.iter())
-            .map(|(score, metric)| Ok((*metric, score?)))
-            .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
-        ..Scores::default()
-    }))
+    Ok(calculate_net_scores(
+        Scores {
+            url: url.to_string(),
+            scores: join_all(to_run.iter().map(|metric| metric.score(&path, url)))
+                .await
+                .into_iter()
+                .zip(to_run.iter())
+                .map(|(score, metric)| Ok((*metric, score?)))
+                .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
+            ..Scores::default()
+        },
+        weights,
+    ))
 }
 
-fn calculate_net_scores(scores: Scores) -> Scores {
+fn calculate_net_scores(scores: Scores, weights: Arc<input::Weights>) -> Scores {
     let mut sum = 0.;
+    let mut weight_sum = 0.;
+    for (metric, score) in scores.scores.iter() {
+        let weight = match metric {
+            Metric::BusFactor(_) => weights.bus_factor,
+            Metric::Correctness(_) => weights.correctness_factor,
+            Metric::RampUpTime(_) => weights.ramp_up_time,
+            Metric::Responsiveness(_) => weights.responsiveness,
+            Metric::LicenseCompatibility(_) => weights.license_compatibility,
+        };
 
-    // add logic for weighted sum and normalization
-    for (_, score) in scores.scores.iter() {
-        sum += score;
+        sum += score * weight;
+        weight_sum += weight;
+    }
+
+    if weight_sum > 0. {
+        sum /= weight_sum;
     }
 
     Scores {

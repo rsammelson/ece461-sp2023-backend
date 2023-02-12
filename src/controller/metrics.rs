@@ -11,6 +11,10 @@ use crate::controller::*;
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Metric {
     BusFactor(bus_factor::BusFactor),
+    Correctness(correctness::Correctness),
+    RampUpTime(ramp_up_time::RampUpTime),
+    Responsiveness(responsiveness::Responsiveness),
+    LicenseCompatibility(license_compatibility::LicenseCompatibility),
 }
 
 #[async_trait]
@@ -23,6 +27,10 @@ impl Scorer for Metric {
         use Metric::*;
         match self {
             BusFactor(unit) => unit.score(path, url).await,
+            Correctness(unit) => unit.score(path, url).await,
+            RampUpTime(unit) => unit.score(path, url).await,
+            Responsiveness(unit) => unit.score(path, url).await,
+            LicenseCompatibility(unit) => unit.score(path, url).await,
         }
     }
 }
@@ -30,26 +38,12 @@ impl Scorer for Metric {
 impl Display for Metric {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Metric::BusFactor(_) => write!(f, "BusFactor"),
+            Metric::BusFactor(_) => write!(f, "BUS_FACTOR_SCORE"),
+            Metric::Correctness(_) => write!(f, "CORRECTNESS_SCORE"),
+            Metric::RampUpTime(_) => write!(f, "RAMP_UP_SCORE"),
+            Metric::Responsiveness(_) => write!(f, "RESPONSIVENESS_SCORE"),
+            Metric::LicenseCompatibility(_) => write!(f, "LICENSE_SCORE"),
         }
-    }
-}
-
-impl FromStr for Metric {
-    type Err = ControllerError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use Metric::*;
-        match s {
-            "BusFactor" => Ok(BusFactor(bus_factor::BusFactor())),
-            _ => Err(ControllerError::MetricParseError(s.to_string())),
-        }
-    }
-}
-
-impl TryFrom<&str> for Metric {
-    type Error = ControllerError;
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::from_str(value)
     }
 }
 
@@ -57,18 +51,13 @@ pub struct Metrics(Vec<Metric>);
 
 impl Metrics {
     pub fn all() -> Self {
-        Metrics(vec![Metric::BusFactor(bus_factor::BusFactor())])
-    }
-}
-
-impl TryFrom<Vec<&str>> for Metrics {
-    type Error = ControllerError;
-    fn try_from(value: Vec<&str>) -> Result<Self, Self::Error> {
-        let ret = value
-            .iter()
-            .map(|it| (*it).try_into())
-            .collect::<Result<Vec<Metric>, ControllerError>>()?;
-        Ok(Metrics(ret))
+        Metrics(vec![
+            Metric::BusFactor(bus_factor::BusFactor()),
+            Metric::Correctness(correctness::Correctness()),
+            Metric::RampUpTime(ramp_up_time::RampUpTime()),
+            Metric::Responsiveness(responsiveness::Responsiveness()),
+            Metric::LicenseCompatibility(license_compatibility::LicenseCompatibility()),
+        ])
     }
 }
 
