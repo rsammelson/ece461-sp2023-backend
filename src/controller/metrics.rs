@@ -19,18 +19,18 @@ pub enum Metric {
 
 #[async_trait]
 impl Scorer for Metric {
-    async fn score<P: AsRef<Path> + Send>(
+    async fn score(
         &self,
-        path: P,
+        repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         use Metric::*;
         match self {
-            BusFactor(unit) => unit.score(path, url).await,
-            Correctness(unit) => unit.score(path, url).await,
-            RampUpTime(unit) => unit.score(path, url).await,
-            Responsiveness(unit) => unit.score(path, url).await,
-            LicenseCompatibility(unit) => unit.score(path, url).await,
+            BusFactor(unit) => unit.score(repo, url).await,
+            Correctness(unit) => unit.score(repo, url).await,
+            RampUpTime(unit) => unit.score(repo, url).await,
+            Responsiveness(unit) => unit.score(repo, url).await,
+            LicenseCompatibility(unit) => unit.score(repo, url).await,
         }
     }
 }

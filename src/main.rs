@@ -12,7 +12,7 @@ use std::{
     sync::Arc,
     time::{SystemTime, UNIX_EPOCH},
 };
-use tokio::task;
+use tokio::{sync::Mutex, task};
 
 #[derive(Debug, thiserror::Error)]
 enum Error {
@@ -61,7 +61,6 @@ async fn fetch_repo_run_scores(
         url::Url::parse(&url).map_err(|err| Error::UrlParseError(url.to_owned(), err))?,
     )
     .await?;
-    let path = repo_local.path();
 
-    controller::run_metrics(path, &repo_name, metrics, weights).await
+    controller::run_metrics(&Mutex::new(repo_local), &repo_name, metrics, weights).await
 }

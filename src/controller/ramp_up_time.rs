@@ -5,9 +5,9 @@ pub struct RampUpTime();
 
 #[async_trait]
 impl Scorer for RampUpTime {
-    async fn score<P: AsRef<Path> + Send>(
+    async fn score(
         &self,
-        _path: P,
+        _repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
     ) -> Result<f64, Box<dyn Error + Send + Sync>> {
         log::log(
