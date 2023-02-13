@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use crate::controller::*;
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
