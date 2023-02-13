@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$1" == "build" ]; then
+    cargo build --release
+    exit $?
+fi
+
+if [ "$1" == "help" ]; then
+    cargo run --release -- --help
+    exit $?
+fi
+
+if [ "$1" == "install" ]; then
+    cargo install --path .
+    exit $?
+fi
+
+if [ "$1" == "test" ]; then
+    ./test.sh
+    exit $?
+fi
+
+cargo run --release -- $@

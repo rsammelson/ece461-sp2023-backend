@@ -34,11 +34,6 @@ async fn run_backend<I>(args: I) -> Result<(), Box<dyn std::error::Error + Send 
 where
     I: Iterator<Item = String>,
 {
-    let args: Vec<_> = args.collect();
-    for arg in args.iter() {
-        println!("{arg}");
-    }
-
     log::log(LogLevel::Minimal, "Starting program...");
     let start_time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
