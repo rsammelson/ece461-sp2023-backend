@@ -14,10 +14,15 @@ use std::{
 };
 use tokio::{sync::Mutex, task};
 
+#[allow(dead_code)]
 #[derive(Debug, thiserror::Error)]
-enum Error {
+enum BackendError {
     #[error("Could not get a URL from `{0}` because `{1}`")]
-    UrlParseError(String, url::ParseError),
+    UrlParse(String, url::ParseError),
+    #[error("Repository error: `{0}`")]
+    Repo(&'static str),
+    #[error("Test error")]
+    Test,
 }
 
 #[tokio::main]
@@ -86,7 +91,7 @@ async fn fetch_repo_run_scores(
     weights: Arc<Weights>,
 ) -> Result<controller::Scores, Box<dyn std::error::Error + Send + Sync>> {
     let (repo_local, repo_name) = api::fetch::fetch_repo(
-        url::Url::parse(&url).map_err(|err| Error::UrlParseError(url.to_owned(), err))?,
+        url::Url::parse(&url).map_err(|err| BackendError::UrlParse(url.to_owned(), err))?,
     )
     .await?;
 

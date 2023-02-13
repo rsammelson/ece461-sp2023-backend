@@ -1,0 +1,28 @@
+query LicenseQuery($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    licenseInfo {
+      spdxId
+      name
+      pseudoLicense
+    }
+  }
+}
+
+query ResponsivenessQuery($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    issues(last: 100) {
+      nodes {
+        title
+        createdAt
+        comments(first: 100) {
+          nodes {
+            authorAssociation
+            createdAt
+          }
+        }
+        closed,
+        closedAt
+      }
+    }
+  }
+}

@@ -185,7 +185,7 @@ mod tests {
     #[tokio::test]
     async fn github_https_repo_convert() {
         let url = "https://github.com/facebook/react";
-        let url = url::Url::parse(&url).unwrap();
+        let url = url::Url::parse(url).unwrap();
         let repo = url_to_repo_name(url).await.unwrap();
         assert_eq!("facebook/react", format!("{repo}"));
     }
@@ -193,7 +193,7 @@ mod tests {
     #[tokio::test]
     async fn githuh_git_repo_convert() {
         let url = "git://github.com/jonschlinkert/even.git";
-        let url = url::Url::parse(&url).unwrap();
+        let url = url::Url::parse(url).unwrap();
         let repo = url_to_repo_name(url).await.unwrap();
         assert_eq!("jonschlinkert/even", format!("{repo}"));
     }

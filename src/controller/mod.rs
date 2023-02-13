@@ -13,22 +13,29 @@ pub use scores::Scores;
 mod metrics;
 pub use metrics::{Metric, Metrics};
 
-use crate::{api::fetch::GithubRepositoryName, input, log, log::LogLevel};
+use crate::{
+    api::{fetch::GithubRepositoryName, graphql::Queryable},
+    input, log,
+    log::LogLevel,
+};
 
 use async_trait::async_trait;
+use core::fmt;
 use futures::future::join_all;
 use std::{collections::HashMap, error::Error, sync::Arc};
 use tokio::sync::Mutex;
 
-#[cfg_attr(test, mockall::automock)]
+// #[cfg_attr(test, mockall::automock)]
 #[async_trait]
 /// The trait that defines scoring algorithms
 pub trait Scorer {
-    async fn score<'a, 'b, 'c>(
+    async fn score<Q, 'a, 'b, 'c>(
         &'a self,
         repo: &'b tokio::sync::Mutex<git2::Repository>,
-        url: &'c GithubRepositoryName,
-    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>;
+        repo_identifier: &'c Q,
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
+    where
+        Q: Queryable + fmt::Display + Sync + 'static;
 }
 
 /// Run a set of scoring metrics and collect the results
@@ -43,7 +50,7 @@ pub trait Scorer {
 /// Returns `Err()` iff any of the metric calculations return `Err()`
 pub async fn run_metrics<'a, I, S>(
     repo: &Mutex<git2::Repository>,
-    url: GithubRepositoryName,
+    repo_identifier: GithubRepositoryName,
     to_run: I,
     weights: Arc<input::Weights>,
 ) -> Result<Scores, Box<dyn Error + Send + Sync>>
@@ -51,9 +58,12 @@ where
     I: Iterator<Item = &'a S>,
     S: Scorer + 'a,
 {
-    log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));
+    log::log(
+        LogLevel::Minimal,
+        &format!("Starting analysis for {repo_identifier}"),
+    );
 
-    let scores = join_all(to_run.map(|metric| metric.score(repo, &url)))
+    let scores = join_all(to_run.map(|metric| metric.score(repo, &repo_identifier)))
         .await
         .into_iter()
         .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?;
@@ -61,7 +71,7 @@ where
     Ok(calculate_net_score(
         Scores {
             scores,
-            url,
+            repo_identifier,
             ..Scores::default()
         },
         weights,

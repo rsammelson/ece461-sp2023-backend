@@ -16,7 +16,7 @@ async fn simple_sort() {
     let mut tasks = JoinSet::new();
     for i in 0..3 {
         tasks.spawn(hand_back_repo(Ok(Scores {
-            url: GithubRepositoryName {
+            repo_identifier: GithubRepositoryName {
                 owner: "test".to_string(),
                 name: format!("{i}"),
             },

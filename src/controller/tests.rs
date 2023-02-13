@@ -5,10 +5,24 @@ use std::{collections::HashMap, iter::repeat, sync::Arc};
 
 macro_rules! assert_delta {
     ($x:expr, $y:expr, $d:expr) => {
-        if !($x - $y < $d || $y - $x < $d) {
-            panic!();
+        if !(($x - $y).abs() < $d || ($y - $x).abs() < $d) {
+            panic!("{} not close enough to {}", $x, $y);
         }
     };
+}
+
+mockall::mock! {
+    pub Scorer {}
+    #[async_trait]
+    impl Scorer for Scorer {
+        async fn score<Q>(
+            &self,
+            repo: &tokio::sync::Mutex<git2::Repository>,
+            url: &Q,
+        ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
+        where
+            Q: Queryable + fmt::Display + Sync + 'static;
+    }
 }
 
 pub fn get_fake_repository() -> git2::Repository {
@@ -30,7 +44,7 @@ fn score_display_format_simple() {
         controller::{bus_factor, Metric, Scores},
     };
     let result = Scores {
-        url: GithubRepositoryName {
+        repo_identifier: GithubRepositoryName {
             owner: "user".to_string(),
             name: "project".to_string(),
         },
@@ -40,7 +54,7 @@ fn score_display_format_simple() {
             .collect(),
     };
     assert_eq!(
-        format!("{}", result),
+        format!("{result}"),
         r#"{"URL": "https://github.com/user/project", "NET_SCORE": 0.800, "BUS_FACTOR_SCORE": 0.300}"#
     );
 }
@@ -60,7 +74,7 @@ async fn score_display_contains_all() {
 
     // will run all metrics and give them a score of 1
     let mut mock = MockScorer::new();
-    mock.expect_score()
+    mock.expect_score::<GithubRepositoryName>()
         .times(metrics.len())
         .returning(move |_, _| Ok((metrics_iter.next().unwrap(), 1.)));
 
@@ -120,7 +134,7 @@ async fn net_score_calculation_simple() {
     // 1 / len,  2 / len, 3 / len, etc
     let mut counter = 1..=metrics.len();
     let mut mock = MockScorer::new();
-    mock.expect_score()
+    mock.expect_score::<GithubRepositoryName>()
         .times(metrics.len())
         .returning(move |_, _| {
             Ok((

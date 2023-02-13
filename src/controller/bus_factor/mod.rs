@@ -28,14 +28,17 @@ pub struct BusFactor();
 
 #[async_trait]
 impl Scorer for BusFactor {
-    async fn score(
+    async fn score<Q>(
         &self,
         repo: &Mutex<git2::Repository>,
-        url: &GithubRepositoryName,
-    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
+        repo_identifier: &Q,
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
+    where
+        Q: Queryable + fmt::Display + Sync + 'static,
+    {
         log::log(
             LogLevel::All,
-            &format!("Starting to analyze BusFactor for {url}"),
+            &format!("Starting to analyze BusFactor for {repo_identifier}"),
         );
 
         let repo = repo.lock().await;
@@ -78,7 +81,7 @@ impl Scorer for BusFactor {
 
         log::log(
             LogLevel::All,
-            &format!("Done analyzing BusFactor for {url}"),
+            &format!("Done analyzing BusFactor for {repo_identifier}"),
         );
 
         Ok((
