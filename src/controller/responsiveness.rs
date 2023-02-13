@@ -16,7 +16,7 @@ impl Scorer for Responsiveness {
         );
 
         let response_times = repo_identifier.query_responsiveness().await?;
-        let response_times = response_times.iter().map(|r| r.as_ref().ok()).flatten();
+        let response_times = response_times.iter().filter_map(|r| r.as_ref().ok());
 
         let (n, total_time) = response_times.fold((0, chrono::Duration::zero()), |(n, sum), t| {
             (n + 1, sum + *t)

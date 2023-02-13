@@ -86,15 +86,13 @@ impl Queryable for GithubRepositoryName {
 
         let response_data = response_body
             .data
-            .ok_or(APIError::NoReponseError("querying license"))?;
+            .ok_or(APIError::NoReponse("querying license"))?;
 
-        let repo = response_data
-            .repository
-            .ok_or(APIError::InvalidResponseError(
-                "missing repository while querying license",
-            ))?;
+        let repo = response_data.repository.ok_or(APIError::InvalidResponse(
+            "missing repository while querying license",
+        ))?;
 
-        let license_info = repo.license_info.ok_or(APIError::InvalidResponseError(
+        let license_info = repo.license_info.ok_or(APIError::InvalidResponse(
             "missing license_info while querying license",
         ))?;
 
@@ -132,12 +130,12 @@ impl Queryable for GithubRepositoryName {
 
         let response_data = response_body
             .data
-            .ok_or(APIError::NoReponseError("querying license"))?;
+            .ok_or(APIError::NoReponse("querying license"))?;
 
         let issues = response_data
             .repository
             .and_then(|r| r.issues.nodes)
-            .ok_or(APIError::InvalidResponseError(
+            .ok_or(APIError::InvalidResponse(
                 "missing issue nodes while querying responsiveness",
             ))?;
 
@@ -154,7 +152,7 @@ fn issue_to_response_time(
         .comments
         .nodes
         .as_ref()
-        .ok_or(APIError::InvalidResponseError(
+        .ok_or(APIError::InvalidResponse(
             "issue to response time issue didn't have commend nodes",
         ))?;
     let end = comments
@@ -172,7 +170,7 @@ fn issue_to_response_time(
     if issue.closed {
         if let Some(close_time) = &issue.closed_at {
             if close_time.0 < end.0 {
-                end = &close_time;
+                end = close_time;
             }
         }
     }
@@ -181,11 +179,11 @@ fn issue_to_response_time(
 }
 
 fn check_author_association(association: &CommentAuthorAssociation) -> bool {
-    match association {
-        CommentAuthorAssociation::MEMBER => true,
-        CommentAuthorAssociation::OWNER => true,
-        CommentAuthorAssociation::COLLABORATOR => true,
-        CommentAuthorAssociation::CONTRIBUTOR => true,
-        _ => false,
+    matches! {
+        association,
+        CommentAuthorAssociation::MEMBER
+        | CommentAuthorAssociation::OWNER
+        | CommentAuthorAssociation::COLLABORATOR
+        | CommentAuthorAssociation::CONTRIBUTOR
     }
 }

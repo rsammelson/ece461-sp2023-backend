@@ -18,6 +18,8 @@ use tokio::{sync::Mutex, task};
 enum Error {
     #[error("Could not get a URL from `{0}` because `{1}`")]
     UrlParseError(String, url::ParseError),
+    #[error("Repository error: `{0}`")]
+    RepoError(&'static str),
 }
 
 #[tokio::main]
