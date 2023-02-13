@@ -1,4 +1,7 @@
-use crate::{api::graphql::graphql_query_license, controller::*};
+#[cfg(test)]
+mod tests;
+
+use crate::{api::graphql::Queryable, controller::*};
 
 use lazy_static::lazy_static;
 
@@ -34,7 +37,7 @@ impl Scorer for LicenseCompatibility {
             &format!("Starting to analyze LicenseCompatibility for {repo_identifier}"),
         );
 
-        let license = graphql_query_license(repo_identifier).await?;
+        let license = repo_identifier.query_license().await?;
         log::log(
             LogLevel::All,
             &format!("Got license {license:?} for {repo_identifier}"),
