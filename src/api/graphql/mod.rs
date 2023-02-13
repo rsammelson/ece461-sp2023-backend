@@ -53,7 +53,6 @@ struct ResponsivenessQuery {
     name: String,
 }
 
-#[cfg_attr(test, mockall::automock)]
 #[async_trait::async_trait]
 pub trait Queryable {
     async fn query_license(&self) -> Result<Option<String>, Box<dyn Error + Send + Sync>>;

@@ -12,11 +12,14 @@ const LICENSE_JSON_STR: &str = include_str!("licenses.json");
 
 #[async_trait]
 impl Scorer for LicenseCompatibility {
-    async fn score(
+    async fn score<Q>(
         &self,
         _repo: &Mutex<git2::Repository>,
-        repo_identifier: &GithubRepositoryName,
-    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
+        repo_identifier: &Q,
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
+    where
+        Q: Queryable + fmt::Display + Sync + 'static,
+    {
         lazy_static! {
             static ref LICENSE_JSON: serde_json::Value =
                 serde_json::from_str(LICENSE_JSON_STR).unwrap();
@@ -55,8 +58,10 @@ impl Scorer for LicenseCompatibility {
                 .unwrap()
                 .as_array()
                 .unwrap();
-            if let Some(score) = score_from_array(&l, arr_specific) {
-                return Ok((Metric::LicenseCompatibility(LicenseCompatibility()), score));
+            for a in arr_specific {
+                if let Some(score) = score_from_array(&l, a.as_array().unwrap()) {
+                    return Ok((Metric::LicenseCompatibility(LicenseCompatibility()), score));
+                }
             }
         }
 

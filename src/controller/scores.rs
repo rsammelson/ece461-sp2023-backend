@@ -5,7 +5,7 @@ use std::{collections::HashMap, fmt::Display};
 
 /// A struct to represent a variable number of scores
 pub struct Scores {
-    pub url: GithubRepositoryName,
+    pub repo_identifier: GithubRepositoryName,
     pub net_score: f64,
     pub scores: HashMap<Metric, f64>,
 }
@@ -13,7 +13,7 @@ pub struct Scores {
 impl Default for Scores {
     fn default() -> Self {
         Scores {
-            url: GithubRepositoryName {
+            repo_identifier: GithubRepositoryName {
                 owner: "user".to_string(),
                 name: "project".to_string(),
             },
@@ -25,7 +25,7 @@ impl Default for Scores {
 
 impl Display for Scores {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, r#"{{"URL": "{}""#, self.url.as_url())?;
+        write!(f, r#"{{"URL": "{}""#, self.repo_identifier.as_url())?;
         write!(f, r#", "NET_SCORE": {:.3}"#, self.net_score)?;
 
         for (metric, score) in self.scores.iter() {

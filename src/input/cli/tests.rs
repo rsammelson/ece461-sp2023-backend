@@ -14,7 +14,7 @@ fn test_read_file() {
     let assert = cmd.arg("tests/input-urls").arg("-t").assert();
 
     let Output { stdout, .. } = assert.get_output();
-    let stdout = str::from_utf8(&stdout).unwrap();
+    let stdout = str::from_utf8(stdout).unwrap();
 
     print!("Got stdout as:\n```\n{stdout}\n```\n");
 
@@ -29,7 +29,7 @@ fn test_read_file() {
     let lines = BufReader::new(file).lines();
 
     for line in lines.flatten() {
-        println!("Looking for {}", line);
+        println!("Looking for {line}");
         assert!(stdout.contains(&line));
     }
 }
@@ -48,7 +48,7 @@ fn test_set_args() {
     let assert = cmd
         .arg("tests/input-urls")
         .arg("-t")
-        .args(&[
+        .args([
             "-b",
             &format!("{}", weights.bus_factor),
             "-c",
@@ -63,7 +63,7 @@ fn test_set_args() {
         .assert();
 
     let Output { stdout, .. } = assert.get_output();
-    let stdout = str::from_utf8(&stdout).unwrap();
+    let stdout = str::from_utf8(stdout).unwrap();
 
     print!("Got stdout as:\n```\n{stdout}\n```\n");
 
@@ -80,8 +80,5 @@ async fn exec_program() {
     .await;
 
     // should return Ok(()) after printing out weights and urls
-    assert!(match result {
-        Ok(_) => true,
-        _ => false,
-    });
+    assert!(matches!(result, Ok(_)));
 }

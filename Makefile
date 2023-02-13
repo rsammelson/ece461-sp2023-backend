@@ -6,7 +6,7 @@ verify-format:
 	cargo fmt --check
 
 lint:
-	cargo clippy -- -Dwarnings
+	cargo clippy --tests -- -Dwarnings
 
 test:
 	cargo build

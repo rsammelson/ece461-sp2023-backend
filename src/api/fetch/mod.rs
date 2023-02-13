@@ -132,7 +132,7 @@ fn update_repo(url: &str, repo_path: PathBuf) -> Result<Repository, Box<dyn Erro
 
 fn get_remote<'repo>(
     repo: &'repo Repository,
-    url: &str,
+    repo_identifier: &str,
 ) -> Result<(git2::Remote<'repo>, String), Box<dyn Error + Send + Sync>> {
     let mut remote = None;
     let mut remote_name = None;
@@ -140,7 +140,7 @@ fn get_remote<'repo>(
     for rn in remotes.iter().flatten() {
         let remote_object = repo.find_remote(rn)?;
         if let Some(remote_url) = remote_object.url() {
-            if remote_url == url {
+            if remote_url == repo_identifier {
                 // found remote
                 remote = Some(remote_object);
                 remote_name = Some(rn.to_owned());
@@ -149,7 +149,7 @@ fn get_remote<'repo>(
         }
     }
     if remote.is_none() {
-        remote = Some(repo.remote("acme_tool_remote", url)?);
+        remote = Some(repo.remote("acme_tool_remote", repo_identifier)?);
         remote_name = Some("acme_tool_remote".to_owned());
     }
     Ok((remote.unwrap(), remote_name.unwrap()))

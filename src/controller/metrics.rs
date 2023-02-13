@@ -1,6 +1,6 @@
 use std::{fmt::Display, ops::Deref};
 
-use crate::controller::*;
+use crate::{api::graphql::Queryable, controller::*};
 
 /// An enum that is used to tell `run_metrics()` what to run
 ///
@@ -19,11 +19,14 @@ pub enum Metric {
 
 #[async_trait]
 impl Scorer for Metric {
-    async fn score(
+    async fn score<Q>(
         &self,
         repo: &Mutex<git2::Repository>,
-        url: &GithubRepositoryName,
-    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
+        url: &Q,
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
+    where
+        Q: Queryable + fmt::Display + Sync + 'static,
+    {
         use Metric::*;
         match self {
             BusFactor(unit) => unit.score(repo, url).await,

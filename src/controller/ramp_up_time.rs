@@ -5,11 +5,14 @@ pub struct RampUpTime();
 
 #[async_trait]
 impl Scorer for RampUpTime {
-    async fn score(
+    async fn score<Q>(
         &self,
         repo: &Mutex<git2::Repository>,
-        repo_identifier: &GithubRepositoryName,
-    ) -> Result<(Metric, f64), Box<dyn std::error::Error + Send + Sync>> {
+        repo_identifier: &Q,
+    ) -> Result<(Metric, f64), Box<dyn std::error::Error + Send + Sync>>
+    where
+        Q: Queryable + fmt::Display + Sync + 'static,
+    {
         log::log(
             LogLevel::All,
             &format!("Starting to analyze RampUpTime for {repo_identifier}"),
@@ -17,10 +20,9 @@ impl Scorer for RampUpTime {
 
         let repo = repo.lock().await;
 
-        let folder = repo
-            .path()
-            .parent()
-            .ok_or(crate::Error::RepoError("could not get repository location"))?;
+        let folder = repo.path().parent().ok_or(crate::BackendError::Repo(
+            "could not get repository location",
+        ))?;
 
         let paths = std::fs::read_dir(folder)?;
         let filtered_paths = paths

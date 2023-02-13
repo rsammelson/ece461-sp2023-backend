@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use crate::{api::graphql::Queryable, controller::*};
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
@@ -5,11 +8,14 @@ pub struct Responsiveness();
 
 #[async_trait]
 impl Scorer for Responsiveness {
-    async fn score(
+    async fn score<Q>(
         &self,
         _repo: &Mutex<git2::Repository>,
-        repo_identifier: &GithubRepositoryName,
-    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
+        repo_identifier: &Q,
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
+    where
+        Q: Queryable + fmt::Display + Sync + 'static,
+    {
         log::log(
             LogLevel::All,
             &format!("Starting to analyze Responsiveness for {repo_identifier}"),
@@ -36,7 +42,7 @@ impl Scorer for Responsiveness {
 
             log::log(
                 LogLevel::All,
-                &format!("Got responsiveness {score} for {repo_identifier}"),
+                &format!("Got responsiveness {score} for {repo_identifier} ({average_time}, {n})"),
             );
 
             Ok((Metric::Responsiveness(Responsiveness()), score))
