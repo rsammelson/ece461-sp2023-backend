@@ -34,18 +34,13 @@ async fn run_backend<I>(args: I) -> Result<(), Box<dyn std::error::Error + Send 
 where
     I: Iterator<Item = String>,
 {
-    let args: Vec<_> = args.collect();
-    for arg in args.iter() {
-        println!("{arg}");
-    }
-
     log::log(LogLevel::Minimal, "Starting program...");
     let start_time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs();
 
-    let (weights, urls, test_mode) = input::cli::get_inputs(args.into_iter())?;
+    let (weights, urls, test_mode) = input::cli::get_inputs(args)?;
 
     let metrics = Arc::new(Metrics::all());
     let weights = Arc::new(weights);

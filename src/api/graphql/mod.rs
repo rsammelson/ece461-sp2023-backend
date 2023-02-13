@@ -91,15 +91,15 @@ impl Queryable for GithubRepositoryName {
             "missing repository while querying license",
         ))?;
 
-        let license_info = repo.license_info.ok_or(APIError::InvalidResponse(
-            "missing license_info while querying license",
-        ))?;
-
-        if license_info.pseudo_license {
-            return Ok(None);
+        if let Some(license_info) = repo.license_info {
+            if license_info.pseudo_license {
+                Ok(None)
+            } else {
+                Ok(license_info.spdx_id)
+            }
+        } else {
+            Ok(None)
         }
-
-        Ok(license_info.spdx_id)
     }
 
     async fn query_responsiveness(
