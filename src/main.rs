@@ -40,7 +40,7 @@ where
         .unwrap()
         .as_secs();
 
-    let (weights, urls, test_mode) = input::cli::get_inputs(args.into_iter())?;
+    let (weights, urls, test_mode) = input::cli::get_inputs(args)?;
 
     let metrics = Arc::new(Metrics::all());
     let weights = Arc::new(weights);

@@ -1,0 +1,13 @@
+{"metric":"BUS_FACTOR_SCORE", "api":"clone", "filepath":"src/api/fetch/mod.rs", "line":69}
+{"metric":"RAMP_UP_SCORE", "api":"clone", "filepath":"src/api/fetch/mod.rs", "line":69}
+{"metric":"BUS_FACTOR_SCORE", "api":"remote branch enumeration", "filepath":"src/api/fetch/mod.rs", "line":105}
+{"metric":"RAMP_UP_SCORE", "api":"remote branch enumeration", "filepath":"src/api/fetch/mod.rs", "line":105}
+{"metric":"BUS_FACTOR_SCORE", "api":"fetch", "filepath":"src/api/fetch/mod.rs", "line":112}
+{"metric":"RAMP_UP_SCORE", "api":"fetch", "filepath":"src/api/fetch/mod.rs", "line":112}
+{"metric":"BUS_FACTOR_SCORE", "api":"rest", "filepath":"src/api/fetch/url_conversion.rs", "line":82}
+{"metric":"CORRECTNESS_SCORE", "api":"rest", "filepath":"src/api/fetch/url_conversion.rs", "line":82}
+{"metric":"RAMP_UP_SCORE", "api":"rest", "filepath":"src/api/fetch/url_conversion.rs", "line":82}
+{"metric":"RESPONSIVE_MAINTAINER_SCORE", "api":"rest", "filepath":"src/api/fetch/url_conversion.rs", "line":82}
+{"metric":"LICENSE_SCORE", "api":"rest", "filepath":"src/api/fetch/url_conversion.rs", "line":82}
+{"metric":"RESPONSIVE_MAINTAINER_SCORE", "api":"graphql", "filepath":"src/api/graphql/mod.rs", "line":128}
+{"metric":"LICENSE_SCORE", "api":"graphql", "filepath":"src/api/fetch/url_conversion.rs", "line":84}
