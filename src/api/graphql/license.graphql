@@ -1,0 +1,9 @@
+query LicenseQuery($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    licenseInfo {
+      spdxId
+      name
+      pseudoLicense
+    }
+  }
+}
