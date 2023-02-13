@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 586b9d17bd4c0de012790c0d31101da36c0a3950 Bryce Berger <bryce.z.berger@gmail.com> 1676206623 -0500	commit (initial): First
+586b9d17bd4c0de012790c0d31101da36c0a3950 c56d4ce758077d58cc6c85414ee3640f3e1e68b5 Bryce Berger <bryce.z.berger@gmail.com> 1676206652 -0500	commit (amend): First
+c56d4ce758077d58cc6c85414ee3640f3e1e68b5 1aa207d0207e253a375d42dc498eeb143f607958 Bryce Berger <bryce.z.berger@gmail.com> 1676206664 -0500	commit: Second
+1aa207d0207e253a375d42dc498eeb143f607958 70e6ba206bc467a7f91cceac768f0dcad6aa200b Bryce Berger <bryce.z.berger@gmail.com> 1676206686 -0500	commit: Third
+70e6ba206bc467a7f91cceac768f0dcad6aa200b 70e6ba206bc467a7f91cceac768f0dcad6aa200b Bryce Berger <bryce.z.berger@gmail.com> 1676207216 -0500	checkout: moving from main to new
+70e6ba206bc467a7f91cceac768f0dcad6aa200b 70e6ba206bc467a7f91cceac768f0dcad6aa200b Bryce Berger <bryce.z.berger@gmail.com> 1676207223 -0500	checkout: moving from new to main
+70e6ba206bc467a7f91cceac768f0dcad6aa200b c56d4ce758077d58cc6c85414ee3640f3e1e68b5 Bryce Berger <bryce.z.berger@gmail.com> 1676207229 -0500	reset: moving to HEAD~2
