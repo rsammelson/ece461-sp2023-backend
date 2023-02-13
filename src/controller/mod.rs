@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 mod bus_factor;
 mod correctness;
 mod license_compatibility;
@@ -17,14 +20,15 @@ use futures::future::join_all;
 use std::{collections::HashMap, error::Error, sync::Arc};
 use tokio::sync::Mutex;
 
+#[cfg_attr(test, mockall::automock)]
 #[async_trait]
 /// The trait that defines scoring algorithms
-trait Scorer {
-    async fn score(
-        &self,
-        repo: &Mutex<git2::Repository>,
-        url: &GithubRepositoryName,
-    ) -> Result<f64, Box<dyn Error + Send + Sync>>;
+pub trait Scorer {
+    async fn score<'a, 'b, 'c>(
+        &'a self,
+        repo: &'b tokio::sync::Mutex<git2::Repository>,
+        url: &'c GithubRepositoryName,
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>;
 }
 
 /// Run a set of scoring metrics and collect the results
@@ -37,35 +41,38 @@ trait Scorer {
 /// * `log_level`: Passed to each metric to use for logging
 ///
 /// Returns `Err()` iff any of the metric calculations return `Err()`
-pub async fn run_metrics(
+pub async fn run_metrics<'a, I, S>(
     repo: &Mutex<git2::Repository>,
-    url: &GithubRepositoryName,
-    to_run: Arc<Metrics>,
+    url: GithubRepositoryName,
+    to_run: I,
     weights: Arc<input::Weights>,
-) -> Result<Scores, Box<dyn Error + Send + Sync>> {
+) -> Result<Scores, Box<dyn Error + Send + Sync>>
+where
+    I: Iterator<Item = &'a S>,
+    S: Scorer + 'a,
+{
     log::log(LogLevel::Minimal, &format!("Starting analysis for {url}"));
 
-    Ok(calculate_net_scores(
+    let scores = join_all(to_run.map(|metric| metric.score(repo, &url)))
+        .await
+        .into_iter()
+        .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?;
+
+    Ok(calculate_net_score(
         Scores {
-            url: url.to_string(),
-            scores: join_all(to_run.iter().map(|metric| metric.score(repo, url)))
-                .await
-                .into_iter()
-                // this silliness is because `metric.score()` is a future, but `metric` is not
-                .zip(to_run.iter())
-                // this just reorders the tuple while propogating errors upwards
-                .map(|(score, metric)| Ok((*metric, score?)))
-                .collect::<Result<HashMap<metrics::Metric, f64>, Box<dyn Error + Send + Sync>>>()?,
+            scores,
+            url,
             ..Scores::default()
         },
         weights,
     ))
 }
 
-fn calculate_net_scores(scores: Scores, weights: Arc<input::Weights>) -> Scores {
+fn calculate_net_score(scores: Scores, weights: Arc<input::Weights>) -> Scores {
     let (score_sum, weight_sum) = scores
         .scores
         .iter()
+        .filter(|(_metric, score)| **score >= 0.)
         .map(|(metric, score)| {
             let weight = match metric {
                 Metric::BusFactor(_) => weights.bus_factor,

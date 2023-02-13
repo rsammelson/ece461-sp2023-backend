@@ -1,9 +1,25 @@
+#[cfg(test)]
+mod tests;
+
 use crate::controller::*;
 
-use std::{
-    collections::HashMap,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::collections::HashMap;
+
+#[cfg(not(test))]
+fn now() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
+
+// if in test mode, freeze time
+// the test repositories have commits slightly before this time
+// don't want tests to break after a year passes because all the commits are too old
+#[cfg(test)]
+fn now() -> u64 {
+    1676211568u64
+}
 
 const YEAR_SECS: u64 = 60 * 60 * 24 * 365;
 
@@ -16,13 +32,17 @@ impl Scorer for BusFactor {
         &self,
         repo: &Mutex<git2::Repository>,
         url: &GithubRepositoryName,
-    ) -> Result<f64, Box<dyn Error + Send + Sync>> {
+    ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>> {
         log::log(
             LogLevel::All,
             &format!("Starting to analyze BusFactor for {url}"),
         );
 
         let repo = repo.lock().await;
+
+        // this silliness because the mocking library doesn't like
+        // having a function with no arguments
+        let now = now();
 
         let mut walk = repo.revwalk()?;
         walk.set_sorting(git2::Sort::TIME)?;
@@ -36,7 +56,6 @@ impl Scorer for BusFactor {
             let commit = repo.find_commit(oid)?;
 
             let commit_time = commit.time().seconds() as u64;
-            let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
             if now - commit_time > YEAR_SECS {
                 break;
             }
@@ -62,7 +81,10 @@ impl Scorer for BusFactor {
             &format!("Done analyzing BusFactor for {url}"),
         );
 
-        Ok(score_normalized_committers(repo_normalized_committers))
+        Ok((
+            Metric::BusFactor(BusFactor()),
+            score_normalized_committers(repo_normalized_committers),
+        ))
     }
 }
 

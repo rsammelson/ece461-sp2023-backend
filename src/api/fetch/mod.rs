@@ -20,6 +20,12 @@ impl Display for GithubRepositoryName {
     }
 }
 
+impl GithubRepositoryName {
+    pub fn as_url(&self) -> String {
+        format!("https://github.com/{}/{}", self.owner, self.name)
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum RepositoryCreationError {
     #[error("Error while getting repository: `{0}`")]
@@ -147,4 +153,27 @@ fn get_remote<'repo>(
         remote_name = Some("acme_tool_remote".to_owned());
     }
     Ok((remote.unwrap(), remote_name.unwrap()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GithubRepositoryName;
+
+    #[test]
+    fn github_repository_name_display() {
+        let repo = GithubRepositoryName {
+            owner: "owner".to_string(),
+            name: "project".to_string(),
+        };
+        assert_eq!("owner/project", format!("{repo}"));
+    }
+
+    #[test]
+    fn github_repository_name_url() {
+        let repo = GithubRepositoryName {
+            owner: "owner".to_string(),
+            name: "project".to_string(),
+        };
+        assert_eq!("https://github.com/owner/project", repo.as_url());
+    }
 }

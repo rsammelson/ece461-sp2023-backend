@@ -2,7 +2,7 @@ use crate::{controller::Scores, log, log::LogLevel};
 use std::error::Error;
 use tokio::task::JoinSet;
 
-pub async fn print(mut tasks: JoinSet<Result<Scores, Box<dyn Error + Send + Sync>>>) {
+pub async fn sort(mut tasks: JoinSet<Result<Scores, Box<dyn Error + Send + Sync>>>) -> Vec<Scores> {
     let mut all_scores = Vec::with_capacity(tasks.len());
 
     while let Some(Ok(t)) = tasks.join_next().await {
@@ -12,9 +12,12 @@ pub async fn print(mut tasks: JoinSet<Result<Scores, Box<dyn Error + Send + Sync
         }
     }
 
-    all_scores.sort_by(|a, b| a.net_score.partial_cmp(&b.net_score).unwrap());
+    all_scores.sort_by(|a, b| b.net_score.partial_cmp(&a.net_score).unwrap());
+    all_scores
+}
 
-    for repo in all_scores {
+pub async fn print(tasks: JoinSet<Result<Scores, Box<dyn Error + Send + Sync>>>) {
+    for repo in sort(tasks).await {
         println!("{repo}");
     }
 }
