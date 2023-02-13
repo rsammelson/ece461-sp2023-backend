@@ -4,40 +4,39 @@ mod input;
 mod log;
 mod output;
 
+use controller::Metrics;
+use input::Weights;
 use log::LogLevel;
 
 use std::{
-    error::Error,
     sync::Arc,
     time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::task;
 
-use controller::Metrics;
-use input::Weights;
+#[derive(Debug, thiserror::Error)]
+enum Error {
+    #[error("Could not get a URL from `{0}` because `{1}`")]
+    UrlParseError(String, url::ParseError),
+}
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     log::log(LogLevel::Minimal, "Starting program...");
     let start_time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs();
 
-    let urls = [
-        "https://github.com/facebook/react",
-        "https://github.com/npm/registry",
-        "git://github.com/jonschlinkert/even.git",
-        "https://www.npmjs.com/package/react-scripts",
-    ];
+    let (weights, urls) = input::cli::get_inputs()?;
 
     let metrics = Arc::new(Metrics::all());
-    let weights = Arc::new(Weights::new());
+    let weights = Arc::new(weights);
 
     let mut tasks = task::JoinSet::new();
     for url in urls {
         tasks.spawn(fetch_repo_run_scores(
-            url,
+            url?,
             Arc::clone(&metrics),
             Arc::clone(&weights),
         ));
@@ -54,11 +53,14 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 }
 
 async fn fetch_repo_run_scores(
-    url: &str,
+    url: String,
     metrics: Arc<Metrics>,
     weights: Arc<Weights>,
-) -> Result<controller::Scores, Box<dyn Error + Send + Sync>> {
-    let (repo_local, repo_name) = api::fetch::fetch_repo(url::Url::parse(url).unwrap()).await?;
+) -> Result<controller::Scores, Box<dyn std::error::Error + Send + Sync>> {
+    let (repo_local, repo_name) = api::fetch::fetch_repo(
+        url::Url::parse(&url).map_err(|err| Error::UrlParseError(url.to_owned(), err))?,
+    )
+    .await?;
     let path = repo_local.path();
 
     controller::run_metrics(path, &repo_name, metrics, weights).await

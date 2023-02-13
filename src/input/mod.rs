@@ -1,9 +1,25 @@
+pub mod cli;
+
+use std::{fs::File, io};
+
 pub struct Weights {
     pub bus_factor: f64,
     pub correctness_factor: f64,
     pub ramp_up_time: f64,
     pub responsiveness: f64,
     pub license_compatibility: f64,
+}
+
+pub struct Urls {
+    urls: io::Lines<io::BufReader<File>>,
+}
+
+impl Iterator for Urls {
+    type Item = io::Result<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.urls.next()
+    }
 }
 
 impl Weights {
