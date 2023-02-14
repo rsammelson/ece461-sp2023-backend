@@ -12,9 +12,16 @@ files=$( \
 )
 
 RUSTFLAGS=$flags \
+    cargo build
+
+make init-fake-submodules
+
+RUSTFLAGS=$flags \
     cargo test
 
-rm coverage/*
+[ -d coverage ] || mkdir coverage
+
+rm -f coverage/*
 mv default_*.profraw coverage
 llvm-profdata-14 merge -sparse coverage/default*.profraw -o "$profdata"
 
