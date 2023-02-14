@@ -1,6 +1,6 @@
 #!/bin/bash
 
-output=$(./coverage.sh 2> /dev/null)
+output=$(./coverage.sh)
 
 pass=$(echo "$output" | grep -oE '[0-9]+ passed' | sed "s/ passed//")
 fail=$(echo "$output" | grep -oE '[0-9]+ failed' | sed "s/ failed//")
