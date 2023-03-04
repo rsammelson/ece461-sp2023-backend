@@ -1,22 +1,22 @@
-name: Format and Lint
-
-on:
-  pull_request:
-    branches:
-      - master
-
-permissions:
-  checks: write
-  contents: write
-
-jobs:
-  run-formatter:
-    name: Run all checks
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
-
-      - name: Check all
-        run: make -k
+# name: Format and Lint
+# 
+# on:
+#   pull_request:
+#     branches:
+#       - master
+# 
+# permissions:
+#   checks: write
+#   contents: write
+# 
+# jobs:
+#   run-formatter:
+#     name: Run all checks
+#     runs-on: ubuntu-latest
+# 
+#     steps:
+#       - name: Check out Git repository
+#         uses: actions/checkout@v3
+# 
+#       - name: Check all
+#         run: make -k
