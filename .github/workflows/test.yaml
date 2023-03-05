@@ -1,4 +1,8 @@
 
+# used https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions for understanding yaml files
+# learned you can used echo from https://towardsdatascience.com/github-actions-everything-you-need-to-know-to-get-started-537f1dffa0ed 
+# learned you can use make commands from link.yaml adopted from the other team
+
 name: testing repo
 run-name: ${{github.actor}} is trying to do a pull request
 on: [pull_request]
@@ -7,4 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: make check
+      - run: echo "Initializing fake submodules for testing"
+      - run: make init-fake-submodules
+      - run: echo "Executing tests"
+      - run: make test
