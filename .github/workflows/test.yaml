@@ -11,7 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "Initializing fake submodules for testing"
       - run: make init-fake-submodules
-      - run: echo "Executing tests"
       - run: make test
