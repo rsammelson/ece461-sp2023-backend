@@ -1,30 +1,22 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
 class DatabaseTable extends StatelessWidget {
-  DatabaseTable({
+  const DatabaseTable({
     super.key,
     required this.data,
   });
-  final List<dynamic> data;
-  final List<String> columns = ["id", "Package Name", "Status"];
+  final List<List<dynamic>> data;
+  // final List<String> columns = ["id", "Package Name", "Status"];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 25, left: 50, right: 50, top: 0),
-      child: Acrylic(
-        elevation: 5,
-        blurAmount: 50,
-        tint: Colors.white,
-        child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          //shrinkWrap: true,
-          itemCount: data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return DatabaseItem(row: data[index]);
-          },
-        ),
-      ),
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      //shrinkWrap: true,
+      itemCount: data.length,
+      itemBuilder: (BuildContext context, int index) {
+        return DatabaseItem(row: data[index]);
+      },
     );
   }
 }
@@ -39,19 +31,36 @@ class DatabaseItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Container(
-        child: Text("${row[0]}"),
-        padding: EdgeInsets.symmetric(horizontal: 5),
-      ),
-      title: Container(
-        child: Text("${row[1]}"),
-        padding: EdgeInsets.symmetric(horizontal: 5),
-      ),
-      trailing: Container(
-        child: Text("${row[2]}"),
-        padding: EdgeInsets.symmetric(horizontal: 5),
-      ),
+      leading: DatabaseCell(text: row[0]),
+      title: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        for (int i = 1; i < row.length - 1; i++)
+          DatabaseCell(
+            width: MediaQuery.of(context).size.width / row.length,
+            text: row[i],
+          )
+      ]),
+      trailing: DatabaseCell(text: row[row.length - 1]),
       onPressed: () {},
+    );
+  }
+}
+
+class DatabaseCell extends StatelessWidget {
+  const DatabaseCell({
+    super.key,
+    this.text,
+    this.width,
+  });
+
+  final String? text;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: Text(text ?? ""),
     );
   }
 }

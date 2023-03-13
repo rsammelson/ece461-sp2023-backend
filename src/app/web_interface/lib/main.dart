@@ -24,3 +24,47 @@ class WebApp extends StatelessWidget {
     );
   }
 }
+
+class NavPage extends StatefulWidget {
+  const NavPage({super.key, required this.title});
+
+  // Widget for the main page containing the navbar and all other pages within it
+
+  // Title to go on top bar
+  final String title;
+
+  @override
+  State<NavPage> createState() => _NavPageState();
+}
+
+class _NavPageState extends State<NavPage> {
+  // Index of current page
+  int _pageIndex = 0;
+  final GlobalKey _viewKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationView(
+      key: _viewKey,
+      appBar: const NavigationAppBar(
+        automaticallyImplyLeading: false,
+        title: Text("ACMEIR Package Registry", style: TextStyle(fontSize: 18)),
+      ),
+      pane: NavigationPane(
+          selected: _pageIndex,
+          items: [
+            // Home page navbar item
+            PaneItem(
+                icon: const Icon(FluentIcons.a_a_d_logo),
+                title: const Text(
+                  "Home",
+                ),
+                body: const HomePage())
+          ],
+          onChanged: (value) {
+            _pageIndex = value;
+          },
+          displayMode: PaneDisplayMode.compact),
+    );
+  }
+}

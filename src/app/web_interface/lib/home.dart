@@ -1,50 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:web_interface/data.dart';
 
 import 'database_table.dart';
-
-class NavPage extends StatefulWidget {
-  const NavPage({super.key, required this.title});
-
-  // Widget for the main page containing the navbar and all other pages within it
-
-  // Title to go on top bar
-  final String title;
-
-  @override
-  State<NavPage> createState() => _NavPageState();
-}
-
-class _NavPageState extends State<NavPage> {
-  // Index of current page
-  int _pageIndex = 0;
-  final GlobalKey _viewKey = GlobalKey();
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationView(
-      key: _viewKey,
-      appBar: const NavigationAppBar(
-        automaticallyImplyLeading: false,
-        title: Text("ACMEIR Package Registry", style: TextStyle(fontSize: 18)),
-      ),
-      pane: NavigationPane(
-          selected: _pageIndex,
-          items: [
-            // Home page navbar item
-            PaneItem(
-                icon: const Icon(FluentIcons.a_a_d_logo),
-                title: const Text(
-                  "Home",
-                ),
-                body: const HomePage())
-          ],
-          onChanged: (value) {
-            _pageIndex = value;
-          },
-          displayMode: PaneDisplayMode.compact),
-    );
-  }
-}
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -57,6 +14,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
+  final PackageRegistry _packageRegistry = PackageRegistry();
+  final List<String> columns = ["ID", "Package Name", "New Field", "Status"];
+  bool _sortAscending = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,52 +26,76 @@ class _HomePageState extends State<HomePage> {
       children: [
         Container(
             constraints: const BoxConstraints(maxWidth: 500),
-            padding: EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: AutoSuggestBox(
               controller: _searchController,
-              items: [],
-              style: TextStyle(fontSize: 16),
+              items: const [],
+              style: const TextStyle(fontSize: 16),
               clearButtonEnabled: true,
-              leadingIcon: Padding(
+              leadingIcon: const Padding(
                 padding: EdgeInsets.all(8),
                 child: Icon(FluentIcons.search),
               ),
             )),
         Container(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 50),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              DropDownButton(title: Text("Sort"), items: [
-                MenuFlyoutItem(
-                  text: Text("id"),
-                  onPressed: () {},
-                ),
-                MenuFlyoutItem(
-                  text: Text("Name"),
-                  onPressed: () {},
-                ),
-                MenuFlyoutItem(
-                  text: Text("Status"),
-                  onPressed: () {},
-                ),
+              DropDownButton(title: const Text("Sort"), items: [
+                for (int i = 0; i < columns.length; i++)
+                  MenuFlyoutItem(
+                    text: Text(columns[i]),
+                    onPressed: () {},
+                  )
               ]),
               Checkbox(
-                  checked: true,
-                  onChanged: (value) {},
-                  style: CheckboxThemeData(
-                      uncheckedIconColor:
-                          CheckboxTheme.of(context).checkedIconColor,
-                      icon: FluentIcons.up))
+                checked: _sortAscending,
+                onChanged: (value) {
+                  setState(() {
+                    _sortAscending = value!;
+                  });
+                },
+                style: CheckboxThemeData(
+                  icon: _sortAscending ? FluentIcons.up : FluentIcons.down,
+                ),
+              )
             ],
           ),
         ),
         Expanded(
-          child: DatabaseTable(
-            data: [
-              ["1", "package name", "OK"],
-              ["2", "package name", "OK"]
-            ],
+          child: Container(
+            padding:
+                const EdgeInsets.only(bottom: 25, left: 50, right: 50, top: 0),
+            child: Acrylic(
+              elevation: 5,
+              blurAmount: 50,
+              tint: Colors.white,
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: DatabaseCell(text: columns[0]),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        for (int i = 1; i < columns.length - 1; i++)
+                          DatabaseCell(
+                            width: MediaQuery.of(context).size.width /
+                                columns.length,
+                            text: columns[i],
+                          )
+                      ],
+                    ),
+                    trailing: DatabaseCell(text: columns[columns.length - 1]),
+                  ),
+                  Expanded(
+                    child: DatabaseTable(
+                      data: _packageRegistry.data!,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         )
       ],
