@@ -25,6 +25,10 @@ pub struct Cli {
     responsiveness: f64,
     #[clap(short = 'l', long = "licenseCompatibility", default_value = "1")]
     license_compatibility: f64,
+    #[clap(short = 'd', long = "fractionDependencies", default_value = "1")]
+    fraction_dependencies: f64,
+    #[clap(short = 'v', long = "fractionReviewed", default_value = "1")]
+    fraction_reviewed: f64,
     #[clap(short = 't', long = "test")]
     test_mode: bool,
 }
@@ -53,6 +57,8 @@ where
         ramp_up_time: args.ramp_up_time,
         responsiveness: args.responsiveness,
         license_compatibility: args.license_compatibility,
+        fraction_dependencies: args.fraction_dependencies,
+        fraction_reviewed: args.fraction_reviewed,
     };
 
     Ok((

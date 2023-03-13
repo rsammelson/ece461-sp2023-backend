@@ -96,6 +96,8 @@ async fn score_display_contains_all() {
     assert!(displayed.contains("BUS_FACTOR_SCORE"));
     assert!(displayed.contains("RESPONSIVE_MAINTAINER_SCORE"));
     assert!(displayed.contains("LICENSE_SCORE"));
+    assert!(displayed.contains("FRACTION_DEPENDENCIES_SCORE"));
+    assert!(displayed.contains("FRACTION_REVIEWED_SCORE"));
 }
 
 #[tokio::test]
@@ -116,6 +118,8 @@ async fn net_score_calculation_simple() {
         ramp_up_time: 0.1,
         responsiveness: 0.,
         license_compatibility: 1.,
+        fraction_dependencies: 0.38,
+        fraction_reviewed: 0.45,
     };
 
     let correct_net_score = (weights.bus_factor * 1.

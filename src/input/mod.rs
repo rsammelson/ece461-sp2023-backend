@@ -7,7 +7,9 @@ pub struct Weights {
     pub correctness_factor: f64,
     pub ramp_up_time: f64,
     pub responsiveness: f64,
-    pub license_compatibility: f64,
+    pub license_compatibility: f64, 
+    pub fraction_dependencies: f64,
+    pub fraction_reviewed: f64,
 }
 
 pub struct Urls {

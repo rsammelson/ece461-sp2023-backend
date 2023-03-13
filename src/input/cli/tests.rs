@@ -42,6 +42,8 @@ fn test_set_args() {
         ramp_up_time: 1.5,
         responsiveness: 0.3,
         license_compatibility: 0.,
+        fraction_dependencies: 0.25,
+        fraction_reviewed: 0.5,
     };
 
     let mut cmd = Command::cargo_bin(assert_cmd::crate_name!()).unwrap();
@@ -59,6 +61,10 @@ fn test_set_args() {
             &format!("{}", weights.responsiveness),
             "-l",
             &format!("{}", weights.license_compatibility),
+            "-d",
+            &format!("{}", weights.fraction_dependencies),
+            "-v",
+            &format!("{}", weights.fraction_reviewed),
         ])
         .assert();
 
