@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
-import 'package:web_interface/home.dart';
+import 'home.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +18,9 @@ class WebApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ACMEIR Package Registry',
       themeMode: _themeMode,
-      theme: ThemeData(brightness: Brightness.light),
-      darkTheme: ThemeData(brightness: Brightness.dark),
-      home: const HomePage(title: 'ACMEIR Package Registry'),
+      theme: FluentThemeData(brightness: Brightness.light),
+      darkTheme: FluentThemeData(brightness: Brightness.dark),
+      home: const NavPage(title: 'ACMEIR Package Registry'),
     );
   }
 }
