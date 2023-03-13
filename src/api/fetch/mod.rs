@@ -1,7 +1,7 @@
 pub mod url_conversion;
 
 use crate::{log, log::LogLevel};
-
+ 
 use dirs;
 use git2::Repository;
 use std::{error::Error, fmt::Display, path::PathBuf};
