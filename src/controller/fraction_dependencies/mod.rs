@@ -20,4 +20,6 @@ impl Scorer for FractionDependencies {
                         .expect("file.py broke :(");
     //use output num of dependencies to calc score
     //save or return score 
+
+    Ok((Metric::FractionDependencies(FractionDependencies()), (1/output.output)))
 }

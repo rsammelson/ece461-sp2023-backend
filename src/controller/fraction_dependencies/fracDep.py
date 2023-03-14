@@ -22,7 +22,7 @@ def findDeps(repo_owner, repo_name):
     if exist:
         with open('file') as json_file:
             data = json.load(json_file)
-        count = len(data["devDependencies"])
+        count = len(data["dependencies"])
         return count
 
     else:

@@ -8,5 +8,5 @@ pub struct Correctness();
 
 #[async_trait]
 impl Scorer for Reviewed {
-    
+    Ok((Metric::FractionReviewed(FractionReviewed()), -1.))
 }
