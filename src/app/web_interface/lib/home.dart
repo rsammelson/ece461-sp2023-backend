@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        // Search bar
         Container(
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -37,11 +38,13 @@ class _HomePageState extends State<HomePage> {
                 child: Icon(FluentIcons.search),
               ),
             )),
+        // Filter options
         Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 50),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              // Sort drop down
               DropDownButton(title: const Text("Sort"), items: [
                 for (int i = 0; i < columns.length; i++)
                   MenuFlyoutItem(
@@ -49,6 +52,7 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {},
                   )
               ]),
+              // Ascending or descending sort checkbox
               Checkbox(
                 checked: _sortAscending,
                 onChanged: (value) {
@@ -63,6 +67,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+        // Main body
         Expanded(
           child: Container(
             padding:
@@ -73,6 +78,7 @@ class _HomePageState extends State<HomePage> {
               tint: Colors.white,
               child: Column(
                 children: [
+                  // Column names
                   ListTile(
                     leading: DatabaseCell(text: columns[0]),
                     title: Row(
@@ -88,6 +94,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     trailing: DatabaseCell(text: columns[columns.length - 1]),
                   ),
+                  // List of data
                   Expanded(
                     child: DatabaseTable(
                       data: _packageRegistry.data!,

@@ -6,61 +6,71 @@ class DatabaseTable extends StatelessWidget {
     required this.data,
   });
   final List<List<dynamic>> data;
-  // final List<String> columns = ["id", "Package Name", "Status"];
 
   @override
   Widget build(BuildContext context) {
+    // ListView with ListTiles as items, built using input data
     return ListView.builder(
       scrollDirection: Axis.vertical,
-      //shrinkWrap: true,
+      shrinkWrap: false,
       itemCount: data.length,
       itemBuilder: (BuildContext context, int index) {
-        return DatabaseItem(row: data[index]);
+        return DatabaseRow(cells: data[index]);
       },
     );
   }
 }
 
-class DatabaseItem extends StatelessWidget {
-  const DatabaseItem({
+class DatabaseRow extends StatelessWidget {
+  // A row in the DatabaseTable
+  // The first item in the list is used as leading in ListTile
+  // The last item in the list is used as trailing in ListTile
+  // All others items in the list are spread out evenly in the title of ListTile
+  const DatabaseRow({
     super.key,
-    required this.row,
+    required this.cells,
   });
-  final List<dynamic> row;
+  final List<dynamic> cells;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: DatabaseCell(text: row[0]),
+      leading: DatabaseCell(text: cells[0]),
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        for (int i = 1; i < row.length - 1; i++)
+        for (int i = 1; i < cells.length - 1; i++)
           DatabaseCell(
-            width: MediaQuery.of(context).size.width / row.length,
-            text: row[i],
+            width: MediaQuery.of(context).size.width / cells.length,
+            text: cells[i],
           )
       ]),
-      trailing: DatabaseCell(text: row[row.length - 1]),
+      trailing: DatabaseCell(text: cells[cells.length - 1]),
       onPressed: () {},
     );
   }
 }
 
 class DatabaseCell extends StatelessWidget {
+  // A single cell in the row (DatabaseRow)
   const DatabaseCell({
     super.key,
     this.text,
     this.width,
+    this.hpad = 5,
   });
 
   final String? text;
   final double? width;
+  final double? hpad;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: Text(text ?? ""),
+      padding: EdgeInsets.symmetric(horizontal: hpad!),
+      child: Text(
+        text ?? "",
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }
