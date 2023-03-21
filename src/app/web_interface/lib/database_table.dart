@@ -40,7 +40,7 @@ class DatabaseRow extends StatelessWidget {
         for (int i = 1; i < cells.length - 1; i++)
           DatabaseCell(
             width: MediaQuery.of(context).size.width / cells.length,
-            text: cells[i],
+            text: '${cells[i]}',
           )
       ]),
       trailing: DatabaseCell(text: cells[cells.length - 1]),

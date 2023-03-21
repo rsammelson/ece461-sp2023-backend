@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:web_interface/data.dart';
 
 import 'database_table.dart';
+import 'main.dart' show columns;
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -14,9 +15,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
-  final PackageRegistry _packageRegistry = PackageRegistry();
-  final List<String> columns = ["ID", "Package Name", "New Field", "Status"];
-  bool _sortAscending = false;
+  final PackageRegistry _pr = PackageRegistry();
+  List<List<dynamic>> filteredData = PackageRegistry().data;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,16 @@ class _HomePageState extends State<HomePage> {
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: AutoSuggestBox(
+              noResultsFoundBuilder: (context) {
+                return Container(
+                  height: 0,
+                );
+              },
+              onChanged: (text, reason) {
+                setState(() {
+                  filteredData = _pr.searchData(text);
+                });
+              },
               controller: _searchController,
               items: const [],
               style: const TextStyle(fontSize: 16),
@@ -54,14 +64,26 @@ class _HomePageState extends State<HomePage> {
               ]),
               // Ascending or descending sort checkbox
               Checkbox(
-                checked: _sortAscending,
+                checked: _pr.isSortAscending,
                 onChanged: (value) {
                   setState(() {
-                    _sortAscending = value!;
+                    _pr.isSortAscending = value!;
                   });
                 },
                 style: CheckboxThemeData(
-                  icon: _sortAscending ? FluentIcons.up : FluentIcons.down,
+                  checkedIconColor: ButtonState.resolveWith(
+                      (states) => FluentTheme.of(context).checkedColor),
+                  uncheckedIconColor: ButtonState.resolveWith(
+                      (states) => FluentTheme.of(context).checkedColor),
+                  checkedDecoration: ButtonState.resolveWith((states) =>
+                      BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: FluentTheme.of(context).accentColor)),
+                  uncheckedDecoration: ButtonState.resolveWith((states) =>
+                      BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: FluentTheme.of(context).accentColor)),
+                  icon: _pr.isSortAscending ? FluentIcons.up : FluentIcons.down,
                 ),
               )
             ],
@@ -97,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                   // List of data
                   Expanded(
                     child: DatabaseTable(
-                      data: _packageRegistry.data!,
+                      data: filteredData,
                     ),
                   ),
                 ],
