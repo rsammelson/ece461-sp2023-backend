@@ -10,6 +10,7 @@ class PackageRegistry {
   bool isSortAscending = true;
   String curSortMethod = columns[0];
   List<List<dynamic>>? _data;
+  List<List<dynamic>> selectedData = [];
 
   // factory will return an instance, not necessarily creating a new one
   factory PackageRegistry() {
@@ -21,54 +22,10 @@ class PackageRegistry {
 
     // data = grabData();
     _data = [
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
-      ["1", "package name", "", "OK"],
-      ["2", "package name", "new", "OK"],
-      ["3", "package name", "--", "OK"],
+      ["1", "package name 1", "1.1.1", "OK"],
+      ["2", "package name 2", "1.0.2.7+1", "OK"],
+      ["3", "package name 3", "3.7.2", "OK"],
+      ["4", "package name 4", "5.6", "OK"],
     ];
 
     // format data on init

@@ -1,11 +1,14 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:web_interface/data.dart';
 
 class DatabaseTable extends StatelessWidget {
   const DatabaseTable({
     super.key,
     required this.data,
+    required this.editSelected,
   });
   final List<List<dynamic>> data;
+  final Function editSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,11 @@ class DatabaseTable extends StatelessWidget {
       shrinkWrap: false,
       itemCount: data.length,
       itemBuilder: (BuildContext context, int index) {
-        return DatabaseRow(cells: data[index]);
+        return DatabaseRow(
+          editSelected: editSelected,
+          cells: data[index],
+          onTap: () {},
+        );
       },
     );
   }
@@ -29,22 +36,32 @@ class DatabaseRow extends StatelessWidget {
   const DatabaseRow({
     super.key,
     required this.cells,
+    this.onTap,
+    required this.editSelected,
   });
   final List<dynamic> cells;
+  final void Function()? onTap;
+  final Function editSelected;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: DatabaseCell(text: cells[0]),
+    return ListTile.selectable(
+      selectionMode: ListTileSelectionMode.multiple,
+      onSelectionChange: (value) {
+        editSelected(value, cells);
+      },
+      selected: PackageRegistry().selectedData.contains(cells),
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        for (int i = 1; i < cells.length - 1; i++)
+        for (int i = 0; i < cells.length - 1; i++)
           DatabaseCell(
             width: MediaQuery.of(context).size.width / cells.length,
             text: '${cells[i]}',
           )
       ]),
-      trailing: DatabaseCell(text: cells[cells.length - 1]),
-      onPressed: () {},
+      trailing: DatabaseCell(
+        text: cells[cells.length - 1],
+        width: 50,
+      ),
     );
   }
 }

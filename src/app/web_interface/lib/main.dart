@@ -6,7 +6,7 @@ import 'home.dart';
 //
 // Constants
 
-const List<String> columns = ["ID", "Package Name", "New Field", "Status"];
+const List<String> columns = ["ID", "Package Name", "Version", "Status"];
 
 //
 
