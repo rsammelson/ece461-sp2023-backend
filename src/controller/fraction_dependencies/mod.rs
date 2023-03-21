@@ -2,7 +2,7 @@
 mod tests;
 
 use crate::controller::*;
-use std::process::Command;
+// use std::process::Command;
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct FractionDependencies();
@@ -14,7 +14,7 @@ impl Scorer for FractionDependencies {
     //pass to python code
     async fn score<Q>(
         &self,
-        repo: &Mutex<git2::Repository>,
+        _repo: &Mutex<git2::Repository>,
         repo_identifier: &Q,
     ) -> Result<(Metric, f64), Box<dyn Error + Send + Sync>>
     where
@@ -25,10 +25,10 @@ impl Scorer for FractionDependencies {
             &format!("Starting to analyze FractionDependencies for {repo_identifier}"),
         );
         
-        let repo = repo.lock().await;
+        // let repo = repo.lock().await;
 
         // let output = -1.0;
-        print!("{}\n", repo_identifier);
+        println!("{}", repo_identifier);
 
         let out = 1.0;
 
@@ -37,7 +37,7 @@ impl Scorer for FractionDependencies {
         //                 .arg("nothing")
         //                 .output()
         //                 .expect("file.py broke :(");
-        print!("{:?}\n", out);
+        println!("{:?}", out);
     //use output num of dependencies to calc score
     //save or return score 
 
