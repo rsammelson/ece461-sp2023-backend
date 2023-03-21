@@ -1,17 +1,27 @@
 import os
 import json
+import sys
 
-file = '$HOME/.cache/acme'
 
 def findDeps(repo_identifier):
     #check slashes
-    
+    file = '$HOME/.cache/acme'
+
+    # print(repo_identifier)
+
     owner_index = repo_identifier.find('/')
     repo_owner = repo_identifier[0 : owner_index]
 
-    repo_name = repo_identifier[(owner_index + 1) :]
+    repo_identifier = repo_identifier[(owner_index+1):]
+    end_index = min(repo_identifier.find('\r'), repo_identifier.find('\n'))
+
+    repo_name = repo_identifier[:end_index]
+    print(repo_name, end='')
 
     file = file + '/' + repo_owner + '/' + repo_name + '/' + 'package.json'
+
+    print("\n\n\n",file,"\n\n\n")
+
     exist = os.path.isfile(file)
 
     if exist:
@@ -23,3 +33,8 @@ def findDeps(repo_identifier):
     else:
         print("error, no path")
         return -1
+
+if findDeps(sys.argv[1]) == -1:
+    exit(1)
+else:
+    exit(0)

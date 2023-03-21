@@ -2,16 +2,13 @@
 mod tests;
 
 use crate::controller::*;
-// use std::process::Command;
+use std::process::Command;
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct FractionDependencies();
 
 #[async_trait]
 impl Scorer for FractionDependencies {
-    //grab repo owner (arg1)
-    //grab repo name (arg2)
-    //pass to python code
     async fn score<Q>(
         &self,
         _repo: &Mutex<git2::Repository>,
@@ -25,18 +22,21 @@ impl Scorer for FractionDependencies {
             &format!("Starting to analyze FractionDependencies for {repo_identifier}"),
         );
         
-        // let repo = repo.lock().await;
+        //grab repo owner (arg1)
+        //grab repo name (arg2)
+        //pass to python code
 
-        // let output = -1.0;
-        println!("{}", repo_identifier);
+        // println!("{}", repo_identifier);
+        // for casting to a string see https://doc.rust-lang.org/rust-by-example/conversion/string.html
+        let repo_id_str : String = repo_identifier.to_string();
+        // println!("{}", repo_id_str);
 
-        let out = 1.0;
+        let out = Command::new("python3")
+                        .arg("src/controller/fraction_dependencies/fracDep.py")
+                        .arg(repo_id_str)
+                        .output()
+                        .expect("file.py broke :(");
 
-        // let out = Command::new("python3")
-        //                 .arg("fracDep.py")
-        //                 .arg("nothing")
-        //                 .output()
-        //                 .expect("file.py broke :(");
         println!("{:?}", out);
     //use output num of dependencies to calc score
     //save or return score 
