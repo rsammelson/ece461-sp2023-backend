@@ -1,21 +1,16 @@
-#Locate cloned repo
-##API->Fetch->mod.rs
-##$HOME/.cache/acme/{repo_owner}/{repo_name}
-
-#Locate package.json
-
-#Open package.json
-
-#Count dependencies
-
-#NEED TO ADD DEPENDENCY?
 import os
 import json
 
 file = '$HOME/.cache/acme'
 
-def findDeps(repo_owner, repo_name):
+def findDeps(repo_identifier):
     #check slashes
+    
+    owner_index = repo_identifier.find('/')
+    repo_owner = repo_identifier[0 : owner_index]
+
+    repo_name = repo_identifier[(owner_index + 1) :]
+
     file = file + '/' + repo_owner + '/' + repo_name + '/' + 'package.json'
     exist = os.path.isfile(file)
 
