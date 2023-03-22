@@ -1,9 +1,21 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:web_interface/data.dart';
 
 import 'home.dart';
 
+//
+// Constants
+
+const List<String> columns = ["ID", "Package Name", "Version", "Status"];
+
+//
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // set up data registry
+  PackageRegistry().importData();
+
   runApp(const WebApp());
 }
 
