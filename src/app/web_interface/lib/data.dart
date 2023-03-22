@@ -26,6 +26,7 @@ class PackageRegistry {
       ["2", "Example 1", "1.0.2.7+1", "OK"],
       ["3", "Fluent UI", "3.7.2", "OK"],
       ["4", "Flutter", "5.6", "OK"],
+      ["5", "My Package", "1.0.2.7+2", "OK"],
     ];
 
     // format data on init
@@ -87,20 +88,41 @@ class PackageRegistry {
     } else if (curSortMethod == columns[2]) {
       _data!.sort(
         (a, b) {
-          //
-          // NEED TO FIND A WAY TO SORT VERSIONS
-          // THAT ISN'T DEPENDENT ON FORMAT 0.0.0
-          //
-          //
-          // List<String> partsStringA = '${a[0]}'.split('.');
-          // List<int> partsIntA = partsStringA.map((i) => int.parse(i)).toList();
-          // int aAsInt =
-          //     partsIntA[0] * 100000 + partsIntA[1] * 1000 + partsIntA[2];
-          // List<String> partsStringB = '${a[0]}'.split('.');
-          // List<int> partsIntB = partsStringB.map((i) => int.parse(i)).toList();
-          // int bAsInt =
-          //     partsIntB[0] * 100000 + partsIntB[1] * 1000 + partsIntB[2];
-          // return aAsInt.compareTo(bAsInt);
+          // split 1.0.0 into ['1', '0', '0']
+          List<String> firstVersions = '${a[2]}'.split(".");
+          List<String> secondVersions = '${b[2]}'.split(".");
+
+          // choose the greater of two lengths
+          int numCompares = firstVersions.length > secondVersions.length
+              ? firstVersions.length
+              : secondVersions.length;
+          for (var i = 0; i <= numCompares; i++) {
+            try {
+              int compare = isSortAscending
+                  ? int.parse(firstVersions[i]) - int.parse(secondVersions[i])
+                  : int.parse(secondVersions[i]) - int.parse(firstVersions[i]);
+              if (compare != 0) {
+                return compare;
+              }
+            } on FormatException catch (exception) {
+              // If version of form 1.0.0+1, int.parse() will fail
+              // Therefore, compare the x value and the y value in 1.0.x+y
+              List<String> x = firstVersions[i].split("+");
+              List<String> y = secondVersions[i].split("+");
+              int compare = isSortAscending
+                  ? int.parse(x[0]) - int.parse(y[0])
+                  : int.parse(y[0]) - int.parse(x[0]);
+              if (compare != 0) {
+                return compare;
+              } else {
+                compare = isSortAscending
+                    ? int.parse(x[1]) - int.parse(y[1])
+                    : int.parse(y[1]) - int.parse(x[1]);
+                return compare;
+              }
+            }
+          }
+          // in case of error, return them as equal
           return 0;
         },
       );
