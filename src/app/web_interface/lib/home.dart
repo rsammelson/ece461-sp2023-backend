@@ -117,13 +117,21 @@ class _HomePageState extends State<HomePage> {
               const CommandBarSeparator(),
               CommandBarButton(
                   onPressed: () {},
-                  icon: DropDownButton(title: const Text("Sort"), items: [
-                    for (int i = 0; i < columns.length; i++)
-                      MenuFlyoutItem(
-                        text: Text(columns[i]),
-                        onPressed: () {},
-                      )
-                  ])),
+                  icon: DropDownButton(
+                    title: const Text("Sort"),
+                    items: [
+                      for (int i = 0; i < columns.length; i++)
+                        MenuFlyoutItem(
+                          text: Text(columns[i]),
+                          onPressed: () {
+                            setState(() {
+                              _pr.curSortMethod = columns[i];
+                              _pr.sortData();
+                            });
+                          },
+                        )
+                    ],
+                  )),
               CommandBarButton(
                   onPressed: () {},
                   icon: Checkbox(
@@ -131,6 +139,7 @@ class _HomePageState extends State<HomePage> {
                     onChanged: (value) {
                       setState(() {
                         _pr.isSortAscending = value!;
+                        _pr.sortData();
                       });
                     },
                     style: CheckboxThemeData(

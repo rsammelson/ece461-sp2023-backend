@@ -21,7 +21,6 @@ class DatabaseTable extends StatelessWidget {
         return DatabaseRow(
           editSelected: editSelected,
           cells: data[index],
-          onTap: () {},
         );
       },
     );
@@ -36,11 +35,9 @@ class DatabaseRow extends StatelessWidget {
   const DatabaseRow({
     super.key,
     required this.cells,
-    this.onTap,
     required this.editSelected,
   });
   final List<dynamic> cells;
-  final void Function()? onTap;
   final Function editSelected;
 
   @override

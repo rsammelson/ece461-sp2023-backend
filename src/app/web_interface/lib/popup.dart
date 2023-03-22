@@ -21,7 +21,7 @@ Future<String> showDeletePackageDialog(
           child: const Text('Delete'),
           onPressed: () {
             Navigator.pop(context, 'deleted');
-            // Delete file here
+            // Delete packages here
           },
         ),
         FilledButton(
@@ -55,7 +55,7 @@ Future<String> showUpdatePackageDialog(
           child: const Text('Update'),
           onPressed: () {
             Navigator.pop(context, 'updated');
-            // Delete file here
+            // Update packages here
           },
         ),
         FilledButton(
@@ -83,7 +83,8 @@ Future<String> showAddPackageDialog(BuildContext context) async {
           child: const Text('Add'),
           onPressed: () {
             Navigator.pop(context, 'added');
-            // Delete file here
+            // Add package here
+            // Must check if package with same name and version already exists or not
           },
         ),
         FilledButton(
