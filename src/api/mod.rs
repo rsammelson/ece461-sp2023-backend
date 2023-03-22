@@ -9,7 +9,7 @@ use std::error::Error;
 
 #[derive(Debug, thiserror::Error)]
 enum APIError {
-    #[error("Must provide GITHUB_API_TOKEN environment variable")]
+    #[error("Must provide GITHUB_TOKEN environment variable")]
     GithubToken,
     #[error("API did not receive a response while {0}")]
     NoReponse(&'static str),
@@ -30,7 +30,7 @@ pub fn get_client() -> Result<Client, Box<dyn Error + Send + Sync>> {
 pub fn get_github_client() -> Result<Client, Box<dyn Error + Send + Sync>> {
     lazy_static! {
         static ref TOKEN: Result<String, APIError> = Ok("bearer ".to_owned()
-            + &std::env::var("GITHUB_API_TOKEN").map_err(|_| APIError::GithubToken)?);
+            + &std::env::var("GITHUB_TOKEN").map_err(|_| APIError::GithubToken)?);
     }
 
     let token = TOKEN.as_ref()?;
