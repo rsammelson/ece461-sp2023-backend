@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                 icon: DropDownButton(
                   title: const Text("Sort"),
                   items: [
-                    for (int i = 0; i < columns.length; i++)
+                    for (int i = 0; i < columns.length - 1; i++)
                       MenuFlyoutItem(
                         text: Text(columns[i]),
                         onPressed: () {

@@ -158,7 +158,7 @@ class PackageRegistry {
     }
 
     for (List<dynamic> row in _data!) {
-      if ('${row[1]}'.contains(keyword)) {
+      if ('${row[1]}'.toLowerCase().contains(keyword)) {
         filtered.add(row);
       }
     }
