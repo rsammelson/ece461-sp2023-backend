@@ -1,5 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:web_interface/data.dart';
+
+import 'data.dart' show PackageRegistry;
+import 'main.dart' show trailingSize;
+import 'popup.dart';
 
 class DatabaseTable extends StatelessWidget {
   const DatabaseTable({
@@ -49,15 +52,20 @@ class DatabaseRow extends StatelessWidget {
       },
       selected: PackageRegistry().selectedData.contains(cells),
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        for (int i = 0; i < cells.length - 1; i++)
+        for (int i = 0; i < cells.length; i++)
           DatabaseCell(
-            width: MediaQuery.of(context).size.width / cells.length,
+            width: MediaQuery.of(context).size.width / (cells.length + 2),
             text: '${cells[i]}',
           )
       ]),
-      trailing: DatabaseCell(
-        text: cells[cells.length - 1],
-        width: 50,
+      trailing: SizedBox(
+        width: trailingSize,
+        child: FilledButton(
+          onPressed: () async {
+            await showPropertiesDialog(context);
+          },
+          child: const Text("Properties"),
+        ),
       ),
     );
   }

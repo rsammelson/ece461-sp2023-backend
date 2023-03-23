@@ -1,9 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:web_interface/data.dart';
-import 'package:web_interface/popup.dart';
 
-import 'database_table.dart';
-import 'main.dart' show columns;
+import 'data.dart' show PackageRegistry;
+import 'popup.dart'
+    show showAddPackageDialog, showDeletePackageDialog, showUpdatePackageDialog;
+import 'database_table.dart' show DatabaseCell, DatabaseTable;
+import 'main.dart' show columns, trailingSize;
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -53,6 +54,7 @@ class _HomePageState extends State<HomePage> {
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: AutoSuggestBox(
+              placeholder: 'Search',
               noResultsFoundBuilder: (context) {
                 return Container(
                   height: 0,
@@ -83,6 +85,13 @@ class _HomePageState extends State<HomePage> {
             compactBreakpointWidth: 900,
             primaryItems: [
               CommandBarButton(
+                onPressed: () {
+                  // Call method to refresh data (make sure filteredData is also adjusted)
+                },
+                icon: const Icon(FluentIcons.update_restore),
+                label: const Text("Refresh"),
+              ),
+              CommandBarButton(
                   onPressed: () async {
                     // Call add method (make one in PackageRegistry)
                     String result = await showAddPackageDialog(context);
@@ -91,47 +100,54 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(FluentIcons.add),
                   label: const Text('Add')),
               CommandBarButton(
-                  onPressed: _pr.selectedData.isEmpty
-                      ? null
-                      : () async {
-                          // Call delete method (make one in PackageRegistry)
-                          String result = await showDeletePackageDialog(
-                              context, _pr.selectedData);
-                          setState(() {});
-                        },
-                  icon: const Icon(FluentIcons.delete),
-                  label: Text(
-                      'Delete${_pr.selectedData.isEmpty ? '' : ' (${_pr.selectedData.length})'}')),
+                onPressed: _pr.selectedData.isEmpty
+                    ? null
+                    : () async {
+                        // Call delete method (make one in PackageRegistry)
+                        String result = await showDeletePackageDialog(
+                            context, _pr.selectedData);
+                        setState(() {});
+                      },
+                icon: const Icon(FluentIcons.delete),
+                label: Text(
+                  'Delete${_pr.selectedData.isEmpty ? '' : ' (${_pr.selectedData.length})'}',
+                ),
+              ),
               CommandBarButton(
-                  onPressed: _pr.selectedData.isEmpty
-                      ? null
-                      : () async {
-                          // Call update method (make one in PackageRegistry)
-                          String result = await showUpdatePackageDialog(
-                              context, _pr.selectedData);
-                          setState(() {});
-                        },
-                  icon: const Icon(FluentIcons.update_restore),
-                  label: Text(
-                      'Update${_pr.selectedData.length <= 1 ? '' : ' All'}')),
+                onPressed: _pr.selectedData.isEmpty
+                    ? null
+                    : () async {
+                        // Call update method (make one in PackageRegistry)
+                        String result = await showUpdatePackageDialog(
+                            context, _pr.selectedData);
+                        setState(() {});
+                      },
+                icon: const Icon(FluentIcons.download),
+                label: Text(
+                  'Update${_pr.selectedData.length <= 1 ? '' : ' All'}',
+                ),
+              ),
               const CommandBarSeparator(),
               CommandBarButton(
-                  onPressed: () {},
-                  icon: DropDownButton(
-                    title: const Text("Sort"),
-                    items: [
-                      for (int i = 0; i < columns.length; i++)
-                        MenuFlyoutItem(
-                          text: Text(columns[i]),
-                          onPressed: () {
-                            setState(() {
+                onPressed: () {},
+                icon: DropDownButton(
+                  title: const Text("Sort"),
+                  items: [
+                    for (int i = 0; i < columns.length; i++)
+                      MenuFlyoutItem(
+                        text: Text(columns[i]),
+                        onPressed: () {
+                          setState(
+                            () {
                               _pr.curSortMethod = columns[i];
                               _pr.sortData();
-                            });
-                          },
-                        )
-                    ],
-                  )),
+                            },
+                          );
+                        },
+                      )
+                  ],
+                ),
+              ),
               CommandBarButton(
                   onPressed: () {},
                   icon: Checkbox(
@@ -208,13 +224,13 @@ class _HomePageState extends State<HomePage> {
                           for (int i = 0; i < columns.length - 1; i++)
                             DatabaseCell(
                               width: MediaQuery.of(context).size.width /
-                                  columns.length,
-                              text: '${columns[i]}',
+                                  (columns.length + 1),
+                              text: columns[i],
                             )
                         ]),
                     trailing: DatabaseCell(
                       text: columns[columns.length - 1],
-                      width: 50,
+                      width: trailingSize,
                     ),
                   ),
                   // List of data

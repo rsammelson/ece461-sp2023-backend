@@ -1,14 +1,22 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:web_interface/data.dart';
 
+import 'data.dart' show PackageRegistry;
 import 'home.dart';
 
 //
 // Constants
 
-const List<String> columns = ["ID", "Package Name", "Version", "Status"];
-
-//
+const List<String> columns = [
+  "ID",
+  "Package Name",
+  "Version",
+  "Rating",
+  "Properties"
+];
+const double trailingSize = 100.0;
+// Do we have IDs for each package?
+// Use Firebase for auth?
+// What are the properties
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

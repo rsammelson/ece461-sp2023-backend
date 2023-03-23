@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'main.dart' show columns;
 
 class PackageRegistry {
@@ -24,12 +22,12 @@ class PackageRegistry {
 
     // data = grabData();
     _data = [
-      ["1", "Example 2", "1.1.1", "OK"],
-      ["2", "Example 1", "1.0.2.7+1", "OK"],
-      ["3", "Fluent UI", "3.7.2", "OK"],
-      ["4", "Flutter", "5.6", "OK"],
-      ["5", "My Package", "1.0.2.7+2", "OK"],
-      ["6", "Flutter", "3.7", "OK"],
+      ["1", "Example 2", "1.1.1", "5"],
+      ["2", "Example 1", "1.0.2.7+1", "3.4"],
+      ["3", "Fluent UI", "3.7.2", "1.8"],
+      ["4", "Flutter", "5.6", "4.5"],
+      ["5", "My Package", "1.0.2.7+2", "4.7"],
+      ["6", "Flutter", "3.7", "3.9"],
     ];
 
     // format data on init
@@ -109,14 +107,14 @@ class PackageRegistry {
                 if (compare != 0) {
                   return compare;
                 }
-              } on IndexError catch (exception) {
+              } on IndexError {
                 // If two exact same versions but one is longer
                 // Such as 3.7.2 and 3.7
                 return isSortAscending
                     ? firstVersions.length - secondVersions.length
                     : secondVersions.length - firstVersions.length;
               }
-            } on FormatException catch (exception) {
+            } on FormatException {
               // If version of form 1.0.0+1, int.parse() will fail
               // Therefore, compare the x value and the y value in 1.0.x+y
               List<String> x = firstVersions[i].split("+");
