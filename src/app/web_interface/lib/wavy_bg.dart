@@ -1,8 +1,6 @@
 import 'dart:math' show cos, pi, sin;
 import 'package:fluent_ui/fluent_ui.dart';
 
-import 'main.dart' show offwhite;
-
 class DrawClip extends CustomClipper<Path> {
   double move;
   DrawClip({this.move = 0});
@@ -76,11 +74,11 @@ class _WavingBackgroundState extends State<WavingBackground>
                   height: MediaQuery.of(context).size.height * 0.5,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                        begin: Alignment.bottomLeft,
-                        end: Alignment.topRight,
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                         colors: [
-                          offwhite.withOpacity(0.25),
-                          offwhite.withOpacity(0.75)
+                          Colors.blue.withOpacity(0.25),
+                          Colors.blue.withOpacity(0.75)
                         ]),
                   ),
                 ),

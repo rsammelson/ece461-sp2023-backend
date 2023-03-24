@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
-import 'main.dart' show offwhite;
+import 'main.dart' show offwhite, offwhiteDark;
 import 'wavy_bg.dart' show WavingBackground;
 
 class LoginPage extends StatefulWidget {
@@ -26,11 +26,11 @@ class _LoginPageState extends State<LoginPage> {
               maxHeight: 500, maxWidth: 400, minHeight: 100, minWidth: 100),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
-            color: offwhite.withOpacity(0.25),
+            color: offwhite,
           ),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 20),
               child: Text(
                 "Login",
                 style: TextStyle(fontSize: 32),
@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                 margin: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  color: Color.fromARGB(255, 175, 134, 0),
+                  color: const Color.fromARGB(255, 175, 134, 0),
                 ),
                 child: const Text(
                   'Sign in',
@@ -124,11 +124,9 @@ class LoginTextBox extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
           decoration: BoxDecoration(
-              color: offwhite,
+              color: offwhiteDark,
               border: Border.all(
-                  color: showInvalidText || invalid
-                      ? Colors.red
-                      : offwhite, //Theme.of(context).colorScheme.secondary,
+                  color: showInvalidText || invalid ? Colors.red : offwhiteDark,
                   width: 2),
               borderRadius: BorderRadius.circular(12)),
           constraints: const BoxConstraints(maxWidth: 500),
@@ -158,14 +156,14 @@ class LoginTextBox extends StatelessWidget {
                   ),
                   onPressed: showPassClick,
                 ),
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
                 foregroundDecoration: BoxDecoration(
                     color: Colors.transparent,
                     border: Border.all(color: Colors.transparent)),
                 placeholder: hintText,
                 controller: textFieldController,
                 obscureText: isPassword && !showPass,
-                cursorColor: showInvalidText ? offwhite : Colors.black,
+                cursorColor: showInvalidText ? offwhiteDark : Colors.black,
                 decoration: BoxDecoration(
                     color: Colors.transparent,
                     border: Border.all(color: Colors.transparent)),

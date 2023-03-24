@@ -190,8 +190,7 @@ class _HomePageState extends State<HomePage> {
                   bottom: 25, left: 50, right: 50, top: 0),
               child: Container(
                 decoration: BoxDecoration(
-                    color: offwhite.withOpacity(.25),
-                    borderRadius: BorderRadius.circular(15)),
+                    color: offwhite, borderRadius: BorderRadius.circular(15)),
                 child: Column(
                   children: [
                     // Column names

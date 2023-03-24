@@ -16,7 +16,8 @@ const List<String> columns = [
 ];
 const double trailingSize = 100.0;
 const String siteName = 'ACME Package Registry';
-const Color offwhite = Color.fromARGB(255, 222, 222, 222);
+const Color offwhite = Color.fromARGB(255, 241, 241, 241);
+const Color offwhiteDark = Color.fromARGB(255, 222, 222, 222);
 // Do we have IDs for each package?
 // Use Firebase for auth?
 // What are the properties
