@@ -1,7 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
-import 'home.dart';
+import 'home.dart' show HomePage;
+import 'login.dart' show LoginPage;
 
 //
 // Constants
@@ -14,6 +15,8 @@ const List<String> columns = [
   "Properties"
 ];
 const double trailingSize = 100.0;
+const String siteName = 'ACME Package Registry';
+const Color offwhite = Color.fromARGB(255, 222, 222, 222);
 // Do we have IDs for each package?
 // Use Firebase for auth?
 // What are the properties
@@ -36,11 +39,11 @@ class WebApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return FluentApp(
       debugShowCheckedModeBanner: false,
-      title: 'ACMEIR Package Registry',
+      title: siteName,
       themeMode: _themeMode,
       theme: FluentThemeData(brightness: Brightness.light),
       darkTheme: FluentThemeData(brightness: Brightness.dark),
-      home: const NavPage(title: 'ACMEIR Package Registry'),
+      home: const NavPage(title: siteName),
     );
   }
 }
@@ -68,21 +71,29 @@ class _NavPageState extends State<NavPage> {
       key: _viewKey,
       appBar: const NavigationAppBar(
         automaticallyImplyLeading: false,
-        title: Text("ACMEIR Package Registry", style: TextStyle(fontSize: 18)),
+        title: Text(siteName, style: TextStyle(fontSize: 18)),
       ),
       pane: NavigationPane(
           selected: _pageIndex,
           items: [
             // Home page navbar item
             PaneItem(
-                icon: const Icon(FluentIcons.a_a_d_logo),
+                icon: const Icon(FluentIcons.home),
                 title: const Text(
                   "Home",
                 ),
-                body: const HomePage())
+                body: const HomePage()),
+            PaneItem(
+                icon: const Icon(FluentIcons.contact),
+                title: const Text(
+                  "Login",
+                ),
+                body: const LoginPage()),
           ],
           onChanged: (value) {
-            _pageIndex = value;
+            setState(() {
+              _pageIndex = value;
+            });
           },
           displayMode: PaneDisplayMode.compact),
     );

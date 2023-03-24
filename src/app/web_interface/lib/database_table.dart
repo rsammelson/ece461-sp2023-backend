@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
 import 'main.dart' show trailingSize;
-import 'popup.dart';
+import 'popup.dart' show showPropertiesDialog;
 
 class DatabaseTable extends StatelessWidget {
   const DatabaseTable({
