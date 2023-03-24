@@ -71,7 +71,7 @@ class _WavingBackgroundState extends State<WavingBackground>
               return ClipPath(
                 clipper: DrawClip(move: _animationController.value),
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.5,
+                  height: MediaQuery.of(context).size.height * 0.7,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                         begin: Alignment.topCenter,

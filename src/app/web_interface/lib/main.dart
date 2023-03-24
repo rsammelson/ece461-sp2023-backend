@@ -71,7 +71,7 @@ class _NavPageState extends State<NavPage> {
     return NavigationView(
       transitionBuilder: (child, animation) {
         return HorizontalSlidePageTransition(
-            child: child, animation: animation);
+            animation: animation, child: child);
       },
       key: _viewKey,
       appBar: const NavigationAppBar(

@@ -13,9 +13,27 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
   bool showingPass = false;
-  bool invalidPass = true;
-  bool invalidUser = true;
+  bool invalidPass = false;
+  bool invalidUser = false;
+  bool isWorking = false;
+
+  signInBtnPress() async {
+    // Turn on progress indicator
+    setState(() {
+      isWorking = true;
+    });
+    invalidPass = _passController.text == '' ? true : false;
+    invalidUser = _userController.text == '' ? true : false;
+
+    await Future.delayed(const Duration(seconds: 1));
+    // Reset button and show logged in
+    setState(() {
+      isWorking = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               child: LoginTextBox(
+                textFieldController: _userController,
                 invalidText: 'Incorrect Username',
                 // showInvalidText: invalidUser,
                 invalid: invalidUser,
@@ -48,6 +67,7 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               child: LoginTextBox(
+                textFieldController: _passController,
                 invalidText: 'Incorrect Password',
                 // showInvalidText: invalidPass,
                 invalid: invalidPass,
@@ -62,24 +82,40 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  invalidPass = !invalidPass;
-                  invalidUser = !invalidUser;
-                });
+              onTap: () async {
+                // Wait till process complete
+                await signInBtnPress();
               },
-              child: Container(
+              child: AnimatedContainer(
+                width: isWorking ? 104 : 140,
+                duration: const Duration(milliseconds: 150),
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
                 margin: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  color: const Color.fromARGB(255, 175, 134, 0),
+                  color: isWorking ? Colors.white : Colors.blue,
                 ),
-                child: const Text(
-                  'Sign in',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
+                child: isWorking
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          SizedBox(
+                              width: 24, height: 24, child: ProgressRing()),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            textAlign: TextAlign.center,
+                            softWrap: true,
+                            overflow: TextOverflow.fade,
+                            'Sign in',
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
+                        ],
+                      ),
               ),
             )
           ]),
