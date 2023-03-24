@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'main.dart' show offwhite;
+import 'wavy_bg.dart' show WavingBackground;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -18,68 +19,71 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        constraints: const BoxConstraints(
-            maxHeight: 500, maxWidth: 400, minHeight: 100, minWidth: 100),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25),
-          color: Colors.white,
-        ),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Text(
-              "Login",
-              style: TextStyle(fontSize: 32),
-            ),
+    return WavingBackground(
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(
+              maxHeight: 500, maxWidth: 400, minHeight: 100, minWidth: 100),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: offwhite.withOpacity(0.25),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-            child: LoginTextBox(
-              invalidText: 'Incorrect Username',
-              // showInvalidText: invalidUser,
-              invalid: invalidUser,
-              hintText: 'Username',
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                "Login",
+                style: TextStyle(fontSize: 32),
+              ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-            child: LoginTextBox(
-              invalidText: 'Incorrect Password',
-              // showInvalidText: invalidPass,
-              invalid: invalidPass,
-              showPass: showingPass,
-              showPassClick: () {
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              child: LoginTextBox(
+                invalidText: 'Incorrect Username',
+                // showInvalidText: invalidUser,
+                invalid: invalidUser,
+                hintText: 'Username',
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              child: LoginTextBox(
+                invalidText: 'Incorrect Password',
+                // showInvalidText: invalidPass,
+                invalid: invalidPass,
+                showPass: showingPass,
+                showPassClick: () {
+                  setState(() {
+                    showingPass = !showingPass;
+                  });
+                },
+                isPassword: true,
+                hintText: 'Password',
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
                 setState(() {
-                  showingPass = !showingPass;
+                  invalidPass = !invalidPass;
+                  invalidUser = !invalidUser;
                 });
               },
-              isPassword: true,
-              hintText: 'Password',
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                invalidPass = !invalidPass;
-                invalidUser = !invalidUser;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-              margin: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: Color.fromARGB(255, 175, 134, 0),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+                margin: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Color.fromARGB(255, 175, 134, 0),
+                ),
+                child: const Text(
+                  'Sign in',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
               ),
-              child: const Text(
-                'Sign in',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-          )
-        ]),
+            )
+          ]),
+        ),
       ),
     );
   }

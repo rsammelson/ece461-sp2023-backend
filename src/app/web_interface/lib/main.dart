@@ -68,6 +68,10 @@ class _NavPageState extends State<NavPage> {
   @override
   Widget build(BuildContext context) {
     return NavigationView(
+      transitionBuilder: (child, animation) {
+        return HorizontalSlidePageTransition(
+            child: child, animation: animation);
+      },
       key: _viewKey,
       appBar: const NavigationAppBar(
         automaticallyImplyLeading: false,
@@ -95,7 +99,7 @@ class _NavPageState extends State<NavPage> {
               _pageIndex = value;
             });
           },
-          displayMode: PaneDisplayMode.compact),
+          displayMode: PaneDisplayMode.minimal),
     );
   }
 }
