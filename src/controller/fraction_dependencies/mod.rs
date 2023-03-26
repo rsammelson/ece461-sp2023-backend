@@ -39,9 +39,9 @@ impl Scorer for FractionDependencies {
 
         println!("{:?}", out);
 
-        let out_str = String::from_utf8_lossy(&out.stdout);
+        //let out_str = String::from_utf8_lossy(&out.stdout);
 
-        let out_float = out_str.parse::<f32>()?;
+        //let out_float = out_str.parse::<f32>()?;
 
         println!("{:?}", out_str);
     //use output num of dependencies to calc score
