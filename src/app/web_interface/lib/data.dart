@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'main.dart' show columns;
 
 class PackageRegistry {
@@ -6,11 +8,11 @@ class PackageRegistry {
   // Prevents mixed data values from different instances when used across app
   static final PackageRegistry _instance = PackageRegistry._internal();
 
-  // internal vars
+  // vars (leading _ means internal)
   bool isSortAscending = true;
   String curSortMethod = columns[0];
-  List<List<dynamic>>? _data;
-  List<List<dynamic>> selectedData = [];
+  List<Map<String, dynamic>>? _data;
+  List<Map<String, dynamic>> selectedData = [];
 
   // factory will return an instance, not necessarily creating a new one
   factory PackageRegistry() {
@@ -22,10 +24,14 @@ class PackageRegistry {
 
     // data = grabData();
     _data = [
-      ["1", "package name 1", "1.1.1", "OK"],
-      ["2", "package name 2", "1.0.2.7+1", "OK"],
-      ["3", "package name 3", "3.7.2", "OK"],
-      ["4", "package name 4", "5.6", "OK"],
+      {
+        "name": "Package",
+        "rating": 1.5,
+        "id": 1,
+        "info": "Extra desc",
+        "version": "1.5.6+1",
+        "url": "https://console.firebase.google.com"
+      },
     ];
 
     // format data on init
@@ -34,9 +40,9 @@ class PackageRegistry {
 
   // rest of class as normal
 
-  List<List<dynamic>> get data => searchData('');
+  List<Map<String, dynamic>> get data => searchData('');
 
-  set data(List<List<dynamic>> values) => _data = values;
+  set data(List<Map<String, dynamic>> values) => _data = values;
 
   bool formatData() {
     if (_data == null || _data!.isEmpty) {
@@ -45,18 +51,22 @@ class PackageRegistry {
 
     bool didFormat = false;
     for (int i = 0; i < _data!.length; i++) {
-      for (int j = 0; j < _data![i].length; j++) {
-        if (_data![i][j] == "") {
-          _data![i][j] = "--";
-          didFormat = true;
-        }
-      }
+      // format mapping?
     }
     return didFormat;
   }
 
-  bool importData() {
+  Future<bool> importData() async {
     // Grab data stored in the cloud and set data value of this class
+    // FirebaseFirestore.instance.collection(collectionPath)
+    List<Map<String, dynamic>> newData = [];
+    var firestoreData =
+        await FirebaseFirestore.instance.collection('/packages').get();
+    for (var ff in firestoreData.docs) {
+      newData.add(ff.data());
+    }
+    _data = newData;
+
     return false;
   }
 
@@ -71,28 +81,97 @@ class PackageRegistry {
     }
 
     if (curSortMethod == columns[0]) {
+      _data!.sort(
+        (a, b) => isSortAscending
+            ? int.parse(a['id']).compareTo(int.parse(b['id']))
+            : int.parse(b['id']).compareTo(int.parse(a['id'])),
+      );
       return true;
     } else if (curSortMethod == columns[1]) {
+      _data!.sort(
+        (a, b) => isSortAscending
+            ? '${a['name']}'
+                .toLowerCase()
+                .compareTo('${b['name']}'.toLowerCase())
+            : '${b['name']}'
+                .toLowerCase()
+                .compareTo('${a['name']}'.toLowerCase()),
+      );
       return true;
     } else if (curSortMethod == columns[2]) {
+      _data!.sort(
+        (a, b) {
+          // split 1.0.0 into ['1', '0', '0']
+          List<String> firstVersions = '${a['version']}'.split(".");
+          List<String> secondVersions = '${b['version']}'.split(".");
+
+          // choose the greater of two lengths
+          int numCompares = firstVersions.length > secondVersions.length
+              ? firstVersions.length
+              : secondVersions.length;
+          for (var i = 0; i <= numCompares; i++) {
+            try {
+              try {
+                int compare = isSortAscending
+                    ? int.parse(firstVersions[i]) - int.parse(secondVersions[i])
+                    : int.parse(secondVersions[i]) -
+                        int.parse(firstVersions[i]);
+                if (compare != 0) {
+                  return compare;
+                }
+              } on IndexError {
+                // If two exact same versions but one is longer
+                // Such as 3.7.2 and 3.7
+                return isSortAscending
+                    ? firstVersions.length - secondVersions.length
+                    : secondVersions.length - firstVersions.length;
+              }
+            } on FormatException {
+              // If version of form 1.0.0+1, int.parse() will fail
+              // Therefore, compare the x value and the y value in 1.0.x+y
+              List<String> x = firstVersions[i].split("+");
+              List<String> y = secondVersions[i].split("+");
+              int compare = isSortAscending
+                  ? int.parse(x[0]) - int.parse(y[0])
+                  : int.parse(y[0]) - int.parse(x[0]);
+              if (compare != 0) {
+                return compare;
+              } else {
+                compare = isSortAscending
+                    ? int.parse(x[1]) - int.parse(y[1])
+                    : int.parse(y[1]) - int.parse(x[1]);
+                return compare;
+              }
+            }
+          }
+          // in case of error, return them as equal
+          return 0;
+        },
+      );
       return true;
     } else if (curSortMethod == columns[3]) {
+      _data!.sort(
+        (a, b) => isSortAscending
+            ? '${a[3]}'.toLowerCase().compareTo('${b['rating']}'.toLowerCase())
+            : '${b[3]}'.toLowerCase().compareTo('${a['rating']}'.toLowerCase()),
+      );
       return true;
     } else {
       return false;
     }
   }
 
-  List<List<dynamic>> searchData(String keyword) {
-    List<List<dynamic>> filtered = [];
+  List<Map<String, dynamic>> searchData(String keyword) {
     if (_data == null || _data!.isEmpty) {
-      return filtered;
+      return [];
     } else if (keyword == '') {
       return _data!;
     }
 
-    for (List<dynamic> row in _data!) {
-      if ('${row[1]}'.contains(keyword)) {
+    List<Map<String, dynamic>> filtered = [];
+
+    for (Map<String, dynamic> row in _data!) {
+      if ('${row['name']}'.toLowerCase().contains(keyword)) {
         filtered.add(row);
       }
     }

@@ -1,5 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:web_interface/data.dart';
+
+import 'data.dart' show PackageRegistry;
+import 'main.dart' show trailingSize;
+import 'popup.dart' show showPropertiesDialog;
 
 class DatabaseTable extends StatelessWidget {
   const DatabaseTable({
@@ -7,7 +10,7 @@ class DatabaseTable extends StatelessWidget {
     required this.data,
     required this.editSelected,
   });
-  final List<List<dynamic>> data;
+  final List<Map<String, dynamic>> data;
   final Function editSelected;
 
   @override
@@ -21,7 +24,6 @@ class DatabaseTable extends StatelessWidget {
         return DatabaseRow(
           editSelected: editSelected,
           cells: data[index],
-          onTap: () {},
         );
       },
     );
@@ -36,11 +38,9 @@ class DatabaseRow extends StatelessWidget {
   const DatabaseRow({
     super.key,
     required this.cells,
-    this.onTap,
     required this.editSelected,
   });
-  final List<dynamic> cells;
-  final void Function()? onTap;
+  final Map<String, dynamic> cells;
   final Function editSelected;
 
   @override
@@ -52,15 +52,31 @@ class DatabaseRow extends StatelessWidget {
       },
       selected: PackageRegistry().selectedData.contains(cells),
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        for (int i = 0; i < cells.length - 1; i++)
-          DatabaseCell(
-            width: MediaQuery.of(context).size.width / cells.length,
-            text: '${cells[i]}',
-          )
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['id']}',
+        ),
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['name']}',
+        ),
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['version']}',
+        ),
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['rating']}',
+        ),
       ]),
-      trailing: DatabaseCell(
-        text: cells[cells.length - 1],
-        width: 50,
+      trailing: SizedBox(
+        width: trailingSize,
+        child: FilledButton(
+          onPressed: () async {
+            await showPropertiesDialog(context, data: cells);
+          },
+          child: const Text("Properties"),
+        ),
       ),
     );
   }
