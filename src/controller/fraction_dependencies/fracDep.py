@@ -18,11 +18,11 @@ def findDeps(repo_identifier):
 
     # repo_name = repo_identifier[:end_index]
     repo_name = repo_identifier
-    print(repo_name, end='')
+    #print(repo_name, end='')
 
     file = file + '/acme/' + repo_owner + '/' + repo_name + '/' + 'package.json'
 
-    print("\n\n\n",file,"\n\n\n")
+    #print("\n\n\n",file,"\n\n\n")
 
     exist = os.path.isfile(file)
 
@@ -30,13 +30,13 @@ def findDeps(repo_identifier):
         with open(file) as json_file:
             data = json.load(json_file)
             if not("dependencies" in data.keys()):
-                print("-No dep-")
+                #print("-No dep-")
                 return 1 # no dependencies
             count = len(data["dependencies"])
-            print(count)
+            #print(count)
             return count
     else:
-        print("error, no path")
+        #print("error, no path")
         return -1
 
 if findDeps(sys.argv[1]) == -1:
