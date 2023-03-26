@@ -11,3 +11,6 @@ Cargo.lock
 
 # folder used to store artefacts used for coverage reports
 coverage
+
+# folder to hold cloned repos
+acme
