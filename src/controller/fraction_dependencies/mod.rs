@@ -41,6 +41,8 @@ impl Scorer for FractionDependencies {
 
         let out_str = String::from_utf8_lossy(&out.stdout);
 
+        let out_float = out_str.parse::<f32>()?;
+
         println!("{:?}", out_str);
     //use output num of dependencies to calc score
     //save or return score 
@@ -54,7 +56,7 @@ impl Scorer for FractionDependencies {
         Ok((
             Metric::FractionDependencies(FractionDependencies()), 
             // (-1.0),
-            (1.0/out),
+            (1.0/out_float),
         ))
         
     }
