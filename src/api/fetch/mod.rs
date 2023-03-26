@@ -2,7 +2,7 @@ pub mod url_conversion;
 
 use crate::{log, log::LogLevel};
  
-use dirs;
+// use dirs;
 use git2::Repository;
 use std::{error::Error, fmt::Display, path::PathBuf};
 use std::env;
@@ -31,16 +31,16 @@ impl GithubRepositoryName {
 pub enum RepositoryCreationError {
     #[error("Error while getting repository: `{0}`")]
     RepoError(&'static str),
-    #[error("Error while getting repository: `{0}`")]
-    OtherError(&'static str),
+    // #[error("Error while getting repository: `{0}`")]
+    // OtherError(&'static str),
 }
 
 // CACHE PATH IS DEFINED HERE
-fn get_cache_dir() -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
-    Ok(dirs::cache_dir().ok_or(RepositoryCreationError::OtherError(
-        "Cannot locate home directory",
-    ))?)
-}
+// fn get_cache_dir() -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
+//     Ok(dirs::cache_dir().ok_or(RepositoryCreationError::OtherError(
+//         "Cannot locate home directory",
+//     ))?)
+// }
 
 // Get the current working directory
 fn get_current_working_dir() -> std::io::Result<PathBuf> {
