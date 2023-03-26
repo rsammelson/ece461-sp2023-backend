@@ -37,13 +37,13 @@ impl Scorer for FractionDependencies {
                         .output()
                         .expect("file.py broke :(");
 
-        //println!("{:?}", out);
+        println!("{:?}", out);
 
         let out_str = String::from_utf8_lossy(&out.stdout);
 
         let out_float = out_str.parse::<f32>()?;
 
-        println!("{}", out_str);
+        println!("{}", out_float);
     //use output num of dependencies to calc score
     //save or return score 
 
