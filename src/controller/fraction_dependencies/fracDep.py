@@ -32,7 +32,9 @@ def findDeps(repo_identifier):
             if not("dependencies" in data.keys()):
                 return 0 # no dependencies
             count = len(data["dependencies"])
+            print(" - - - ")
             print(count)
+            print(" - - - ")
             return count
     else:
         print("error, no path")
