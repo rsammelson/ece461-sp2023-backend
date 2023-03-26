@@ -22,7 +22,7 @@ def findDeps(repo_identifier):
 
     file = file + '\\acme\\' + repo_owner + '\\' + repo_name + '\\' + 'package.json'
 
-    # print("\n\n\n",file,"\n\n\n")
+    print("\n\n\n",file,"\n\n\n")
 
     exist = os.path.isfile(file)
 
