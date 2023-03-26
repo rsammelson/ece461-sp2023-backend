@@ -11,4 +11,3 @@ Cargo.lock
 
 # folder used to store artefacts used for coverage reports
 coverage
-src/app/web_interface/lib/firebase_options.dart
