@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBwrl4aC3X5bYjCxhkz6NXiMW6BFsEfDRA',
+    apiKey: '',
     appId: '1:35345813874:web:0e1abee374ef3ee9274deb',
     messagingSenderId: '35345813874',
     projectId: 'acme-register',
