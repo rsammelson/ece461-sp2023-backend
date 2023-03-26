@@ -56,7 +56,7 @@ impl Scorer for FractionDependencies {
         Ok((
             Metric::FractionDependencies(FractionDependencies()), 
             // (-1.0),
-            (1.0/out_float),
+            ((1.0/out_float)).into(),
         ))
         
     }
