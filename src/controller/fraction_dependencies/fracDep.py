@@ -20,7 +20,7 @@ def findDeps(repo_identifier):
     repo_name = repo_identifier
     print(repo_name, end='')
 
-    file = file + '\\acme\\' + repo_owner + '\\' + repo_name + '\\' + 'package.json'
+    file = file + '/acme/' + repo_owner + '/' + repo_name + '/' + 'package.json'
 
     print("\n\n\n",file,"\n\n\n")
 
