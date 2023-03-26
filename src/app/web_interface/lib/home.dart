@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
@@ -89,6 +90,7 @@ class _HomePageState extends State<HomePage> {
                 CommandBarButton(
                   onPressed: () async {
                     // Call method to refresh data (make sure filteredData is also adjusted)
+                    if (FirebaseAuth.instance.currentUser != null) {} // TODO
                     await PackageRegistry().importData();
                     setState(() {
                       _searchController.clear();

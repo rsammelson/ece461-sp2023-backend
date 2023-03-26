@@ -34,6 +34,7 @@ Future<void> main() async {
   );
 
   // set up data registry
+  if (FirebaseAuth.instance.currentUser != null) {} // TODO
   bool importDataSuccess = await PackageRegistry().importData();
   if (!importDataSuccess) {
     // Error getting data from firebase
