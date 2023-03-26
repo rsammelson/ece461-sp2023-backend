@@ -5,7 +5,8 @@ import sys
 
 def findDeps(repo_identifier):
     #check slashes
-    file = '$HOME/.cache/acme'
+    #file = '$HOME/.cache/acme'
+    file = os.getcwd()
 
     # print(repo_identifier)
 
