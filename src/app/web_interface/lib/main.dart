@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
+import 'firebase_options.dart' show DefaultFirebaseOptions;
 import 'home.dart' show HomePage;
 import 'login.dart' show LoginPage;
 
@@ -22,19 +25,68 @@ const Color offwhiteDark = Color.fromARGB(255, 222, 222, 222);
 // Use Firebase for auth?
 // What are the properties
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // setup firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // set up data registry
-  PackageRegistry().importData();
+  bool importDataSuccess = await PackageRegistry().importData();
+  if (!importDataSuccess) {
+    // Error getting data from firebase
+  }
 
   runApp(const WebApp());
 }
 
-class WebApp extends StatelessWidget {
+class WebApp extends StatefulWidget {
   const WebApp({super.key});
+
+  @override
+  State<WebApp> createState() => _WebAppState();
+}
+
+class _WebAppState extends State<WebApp> with WidgetsBindingObserver {
   // Theme
   final ThemeMode _themeMode = ThemeMode.system;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.paused:
+        print('Paused');
+        break;
+      case AppLifecycleState.resumed:
+        print('Resumed');
+        break;
+      case AppLifecycleState.inactive:
+        print('Inactive');
+        break;
+      case AppLifecycleState.detached:
+        print('Detached');
+        FirebaseAuth.instance.signOut();
+        break;
+      default:
+        print('Defaulted');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +140,7 @@ class _NavPageState extends State<NavPage> {
                   "Home",
                 ),
                 body: const HomePage()),
+            // Login navbar item
             PaneItem(
                 icon: const Icon(FluentIcons.contact),
                 title: const Text(

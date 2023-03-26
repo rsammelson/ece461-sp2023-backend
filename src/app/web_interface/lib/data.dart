@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'main.dart' show columns;
 
 class PackageRegistry {
@@ -9,8 +11,8 @@ class PackageRegistry {
   // vars (leading _ means internal)
   bool isSortAscending = true;
   String curSortMethod = columns[0];
-  List<List<dynamic>>? _data;
-  List<List<dynamic>> selectedData = [];
+  List<Map<String, dynamic>>? _data;
+  List<Map<String, dynamic>> selectedData = [];
 
   // factory will return an instance, not necessarily creating a new one
   factory PackageRegistry() {
@@ -22,12 +24,14 @@ class PackageRegistry {
 
     // data = grabData();
     _data = [
-      ["1", "Example 2", "1.1.1", "5"],
-      ["2", "Example 1", "1.0.2.7+1", "3.4"],
-      ["3", "Fluent UI", "3.7.2", "1.8"],
-      ["4", "Flutter", "5.6", "4.5"],
-      ["5", "My Package", "1.0.2.7+2", "4.7"],
-      ["6", "Flutter", "3.7", "3.9"],
+      {
+        "name": "Package",
+        "rating": 1.5,
+        "id": 1,
+        "info": "Extra desc",
+        "version": "1.5.6+1",
+        "url": "https://console.firebase.google.com"
+      },
     ];
 
     // format data on init
@@ -36,9 +40,9 @@ class PackageRegistry {
 
   // rest of class as normal
 
-  List<List<dynamic>> get data => searchData('');
+  List<Map<String, dynamic>> get data => searchData('');
 
-  set data(List<List<dynamic>> values) => _data = values;
+  set data(List<Map<String, dynamic>> values) => _data = values;
 
   bool formatData() {
     if (_data == null || _data!.isEmpty) {
@@ -47,18 +51,22 @@ class PackageRegistry {
 
     bool didFormat = false;
     for (int i = 0; i < _data!.length; i++) {
-      for (int j = 0; j < _data![i].length; j++) {
-        if (_data![i][j] == "") {
-          _data![i][j] = "--";
-          didFormat = true;
-        }
-      }
+      // format mapping?
     }
     return didFormat;
   }
 
-  bool importData() {
+  Future<bool> importData() async {
     // Grab data stored in the cloud and set data value of this class
+    // FirebaseFirestore.instance.collection(collectionPath)
+    List<Map<String, dynamic>> newData = [];
+    var firestoreData =
+        await FirebaseFirestore.instance.collection('/packages').get();
+    for (var ff in firestoreData.docs) {
+      newData.add(ff.data());
+    }
+    _data = newData;
+
     return false;
   }
 
@@ -75,23 +83,27 @@ class PackageRegistry {
     if (curSortMethod == columns[0]) {
       _data!.sort(
         (a, b) => isSortAscending
-            ? int.parse(a[0]).compareTo(int.parse(b[0]))
-            : int.parse(b[0]).compareTo(int.parse(a[0])),
+            ? int.parse(a['id']).compareTo(int.parse(b['id']))
+            : int.parse(b['id']).compareTo(int.parse(a['id'])),
       );
       return true;
     } else if (curSortMethod == columns[1]) {
       _data!.sort(
         (a, b) => isSortAscending
-            ? '${a[1]}'.toLowerCase().compareTo('${b[1]}'.toLowerCase())
-            : '${b[1]}'.toLowerCase().compareTo('${a[1]}'.toLowerCase()),
+            ? '${a['name']}'
+                .toLowerCase()
+                .compareTo('${b['name']}'.toLowerCase())
+            : '${b['name']}'
+                .toLowerCase()
+                .compareTo('${a['name']}'.toLowerCase()),
       );
       return true;
     } else if (curSortMethod == columns[2]) {
       _data!.sort(
         (a, b) {
           // split 1.0.0 into ['1', '0', '0']
-          List<String> firstVersions = '${a[2]}'.split(".");
-          List<String> secondVersions = '${b[2]}'.split(".");
+          List<String> firstVersions = '${a['version']}'.split(".");
+          List<String> secondVersions = '${b['version']}'.split(".");
 
           // choose the greater of two lengths
           int numCompares = firstVersions.length > secondVersions.length
@@ -140,8 +152,8 @@ class PackageRegistry {
     } else if (curSortMethod == columns[3]) {
       _data!.sort(
         (a, b) => isSortAscending
-            ? '${a[3]}'.toLowerCase().compareTo('${b[3]}'.toLowerCase())
-            : '${b[3]}'.toLowerCase().compareTo('${a[3]}'.toLowerCase()),
+            ? '${a[3]}'.toLowerCase().compareTo('${b['rating']}'.toLowerCase())
+            : '${b[3]}'.toLowerCase().compareTo('${a['rating']}'.toLowerCase()),
       );
       return true;
     } else {
@@ -149,16 +161,17 @@ class PackageRegistry {
     }
   }
 
-  List<List<dynamic>> searchData(String keyword) {
-    List<List<dynamic>> filtered = [];
+  List<Map<String, dynamic>> searchData(String keyword) {
     if (_data == null || _data!.isEmpty) {
-      return filtered;
+      return [];
     } else if (keyword == '') {
       return _data!;
     }
 
-    for (List<dynamic> row in _data!) {
-      if ('${row[1]}'.toLowerCase().contains(keyword)) {
+    List<Map<String, dynamic>> filtered = [];
+
+    for (Map<String, dynamic> row in _data!) {
+      if ('${row['name']}'.toLowerCase().contains(keyword)) {
         filtered.add(row);
       }
     }

@@ -10,7 +10,7 @@ class DatabaseTable extends StatelessWidget {
     required this.data,
     required this.editSelected,
   });
-  final List<List<dynamic>> data;
+  final List<Map<String, dynamic>> data;
   final Function editSelected;
 
   @override
@@ -40,7 +40,7 @@ class DatabaseRow extends StatelessWidget {
     required this.cells,
     required this.editSelected,
   });
-  final List<dynamic> cells;
+  final Map<String, dynamic> cells;
   final Function editSelected;
 
   @override
@@ -52,17 +52,28 @@ class DatabaseRow extends StatelessWidget {
       },
       selected: PackageRegistry().selectedData.contains(cells),
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        for (int i = 0; i < cells.length; i++)
-          DatabaseCell(
-            width: MediaQuery.of(context).size.width / (cells.length + 2),
-            text: '${cells[i]}',
-          )
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['id']}',
+        ),
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['name']}',
+        ),
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['version']}',
+        ),
+        DatabaseCell(
+          width: MediaQuery.of(context).size.width / (cells.length),
+          text: '${cells['rating']}',
+        ),
       ]),
       trailing: SizedBox(
         width: trailingSize,
         child: FilledButton(
           onPressed: () async {
-            await showPropertiesDialog(context);
+            await showPropertiesDialog(context, data: cells);
           },
           child: const Text("Properties"),
         ),

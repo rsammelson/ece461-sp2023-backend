@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'main.dart' show offwhite, offwhiteDark;
@@ -18,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   bool showingPass = false;
   bool invalidPass = false;
   bool invalidUser = false;
+  bool tooManyAttempts = false;
   bool isWorking = false;
 
   signInBtnPress() async {
@@ -27,8 +29,32 @@ class _LoginPageState extends State<LoginPage> {
     });
     invalidPass = _passController.text == '' ? true : false;
     invalidUser = _userController.text == '' ? true : false;
+    // Possible error codes:
+    // wrong-password
+    // user-not-found
+    // invalid-email
+    // too-many-requests
 
-    await Future.delayed(const Duration(seconds: 1));
+    // Try to sign in user, or get error response
+    if (!invalidPass && !invalidUser) {
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: _userController.text, password: _passController.text);
+        _userController.clear();
+        _passController.clear();
+      } on FirebaseAuthException catch (e) {
+        if (e.code.contains("password")) {
+          invalidPass = true;
+        } else if (e.code.contains("not-found")) {
+          invalidUser = true;
+        } else if (e.code.contains("too-many")) {
+          tooManyAttempts = true;
+        } else if (e.code.contains("email")) {
+          invalidUser = true;
+        }
+      }
+    }
+
     // Reset button and show logged in
     setState(() {
       isWorking = false;
@@ -46,48 +72,47 @@ class _LoginPageState extends State<LoginPage> {
             borderRadius: BorderRadius.circular(25),
             color: offwhite,
           ),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 20),
-              child: Text(
-                "Login",
-                style: TextStyle(fontSize: 32),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: LoginTextBox(
-                textFieldController: _userController,
-                invalidText: 'Incorrect Username',
-                // showInvalidText: invalidUser,
-                invalid: invalidUser,
-                hintText: 'Username',
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: LoginTextBox(
-                textFieldController: _passController,
-                invalidText: 'Incorrect Password',
-                // showInvalidText: invalidPass,
-                invalid: invalidPass,
-                showPass: showingPass,
-                showPassClick: () {
-                  setState(() {
-                    showingPass = !showingPass;
-                  });
-                },
-                isPassword: true,
-                hintText: 'Password',
-              ),
-            ),
+          child: FirebaseAuth.instance.currentUser == null
+              ? _buildLogin()
+              : _buildLogout(),
+        ),
+      ),
+    );
+  }
+
+  Column _buildLogout() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: 20, left: 50, right: 50),
+          child: Text(
+            "Hello ${FirebaseAuth.instance.currentUser?.email}!",
+            overflow: TextOverflow.fade,
+            semanticsLabel:
+                "Hello ${FirebaseAuth.instance.currentUser?.email}!",
+            softWrap: true,
+            maxLines: 3,
+            style: TextStyle(fontSize: 28),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             GestureDetector(
               onTap: () async {
                 // Wait till process complete
-                await signInBtnPress();
+                setState(() {
+                  isWorking = true;
+                });
+                await FirebaseAuth.instance.signOut();
+
+                setState(() {
+                  isWorking = false;
+                });
               },
               child: AnimatedContainer(
-                width: isWorking ? 104 : 140,
+                width: isWorking ? 104 : 176,
                 duration: const Duration(milliseconds: 150),
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
@@ -107,21 +132,112 @@ class _LoginPageState extends State<LoginPage> {
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
+                          Padding(
+                            padding: EdgeInsets.only(right: 15),
+                            child: Icon(
+                              FluentIcons.sign_out,
+                              color: Colors.white,
+                            ),
+                          ),
                           Text(
+                            semanticsLabel: 'Logout',
                             textAlign: TextAlign.center,
                             softWrap: true,
                             overflow: TextOverflow.fade,
-                            'Sign in',
+                            'Logout',
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ],
                       ),
               ),
-            )
-          ]),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Column _buildLogin() {
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      const Padding(
+        padding: EdgeInsets.only(bottom: 20),
+        child: Text(
+          "Login",
+          style: TextStyle(fontSize: 32),
         ),
       ),
-    );
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        child: LoginTextBox(
+          textFieldController: _userController,
+          invalidText: 'Incorrect Username',
+          // showInvalidText: invalidUser,
+          invalid: invalidUser,
+          hintText: 'Username',
+        ),
+      ),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        child: LoginTextBox(
+          textFieldController: _passController,
+          invalidText: 'Incorrect Password',
+          // showInvalidText: invalidPass,
+          invalid: invalidPass,
+          showPass: showingPass,
+          showPassClick: () {
+            setState(() {
+              showingPass = !showingPass;
+            });
+          },
+          isPassword: true,
+          hintText: 'Password',
+        ),
+      ),
+      if (tooManyAttempts)
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+          child: Text(
+            "Too many attempts, try again later",
+            style: TextStyle(color: Colors.red),
+          ),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20), color: offwhite),
+        ),
+      Container(
+        height: 75,
+        child: GestureDetector(
+          onTap: () async {
+            // Wait till process complete
+            await signInBtnPress();
+          },
+          child: AnimatedContainer(
+            width: isWorking ? 104 : 140,
+            height: 44,
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+            margin: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              color: isWorking ? Colors.white : Colors.blue,
+            ),
+            child: isWorking
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      SizedBox(width: 24, height: 24, child: ProgressRing()),
+                    ],
+                  )
+                : Text(
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    'Sign in',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+          ),
+        ),
+      )
+    ]);
   }
 }
 

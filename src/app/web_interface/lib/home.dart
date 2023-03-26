@@ -19,9 +19,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   final PackageRegistry _pr = PackageRegistry();
-  List<List<dynamic>> filteredData = PackageRegistry().data;
+  List<Map<String, dynamic>> filteredData = PackageRegistry().data;
 
-  void editSelected(bool addValue, List<dynamic> dataRow) {
+  void editSelected(bool addValue, Map<String, dynamic> dataRow) {
     setState(() {
       if (addValue) {
         if (!_pr.selectedData.contains(dataRow)) {
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _isAllSelected() {
-    for (List<dynamic> row in filteredData) {
+    for (Map<String, dynamic> row in filteredData) {
       if (!_pr.selectedData.contains(row)) {
         return false;
       }
@@ -87,8 +87,13 @@ class _HomePageState extends State<HomePage> {
               compactBreakpointWidth: 900,
               primaryItems: [
                 CommandBarButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // Call method to refresh data (make sure filteredData is also adjusted)
+                    await PackageRegistry().importData();
+                    setState(() {
+                      _searchController.clear();
+                      filteredData = PackageRegistry().data;
+                    });
                   },
                   icon: const Icon(FluentIcons.update_restore),
                   label: const Text("Refresh"),
@@ -207,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                               if (value!) {
                                 // can't do _pr.selectedData = filteredData; because
                                 // object is not copied
-                                for (List<dynamic> row in filteredData) {
+                                for (Map<String, dynamic> row in filteredData) {
                                   if (!_pr.selectedData.contains(row)) {
                                     _pr.selectedData.add(row);
                                   }

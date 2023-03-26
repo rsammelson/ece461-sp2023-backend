@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
 Future<String> showDeletePackageDialog(
-    BuildContext context, List<List<dynamic>> packages) async {
+    BuildContext context, List<Map<String, dynamic>> packages) async {
   final result = await showDialog<String>(
     context: context,
     builder: (context) => ContentDialog(
@@ -13,7 +13,7 @@ Future<String> showDeletePackageDialog(
             'If you delete ${packages.length == 1 ? 'this package' : 'these packages'}, you won\'t be able to recover ${packages.length == 1 ? 'it' : 'them'}. Do you want to delete ${packages.length == 1 ? 'it' : 'them'}?',
             style: const TextStyle(fontSize: 16),
           ),
-          for (List<dynamic> pack in packages) Text(pack[1])
+          for (Map<String, dynamic> pack in packages) Text(pack['name'])
         ],
       ),
       actions: [
@@ -35,7 +35,7 @@ Future<String> showDeletePackageDialog(
 }
 
 Future<String> showUpdatePackageDialog(
-    BuildContext context, List<List<dynamic>> packages) async {
+    BuildContext context, List<Map<String, dynamic>> packages) async {
   final result = await showDialog<String>(
     context: context,
     builder: (context) => ContentDialog(
@@ -47,8 +47,8 @@ Future<String> showUpdatePackageDialog(
             '${packages.length == 1 ? 'Package' : 'Packages'} currently eligible for update listed below will be updated.',
             style: const TextStyle(fontSize: 16),
           ),
-          for (List<dynamic> pack in packages)
-            Text(pack[1]) // CHECK IF A PACKAGE CAN BE UDPATED FIRST
+          for (Map<String, dynamic> pack in packages)
+            Text(pack['name']) // CHECK IF A PACKAGE CAN BE UDPATED FIRST
         ],
       ),
       actions: [
@@ -98,7 +98,8 @@ Future<String> showAddPackageDialog(BuildContext context) async {
   return result ?? 'canceled';
 }
 
-Future<String> showPropertiesDialog(BuildContext context) async {
+Future<String> showPropertiesDialog(BuildContext context,
+    {required Map<String, dynamic> data}) async {
   final result = await showDialog<String>(
     context: context,
     builder: (context) => ContentDialog(
@@ -108,19 +109,24 @@ Future<String> showPropertiesDialog(BuildContext context) async {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            propertyRow(name: 'Property', value: 'value'),
-            propertyRow(name: 'Property', value: 'value'),
-            propertyRow(name: 'Property', value: 'value'),
+            propertyRow(name: 'Name', value: data['name'].toString()),
+            propertyRow(name: 'ID', value: data['id'].toString()),
+            propertyRow(name: 'Rating', value: data['rating'].toString()),
+            propertyRow(name: 'Version', value: data['version'].toString()),
             // This container is a divider
             Container(
               margin: const EdgeInsets.all(15),
               height: 1,
               color: Colors.grey.withOpacity(0.5),
             ),
-            propertyRow(name: 'Property', value: 'value'),
-            propertyRow(name: 'Property', value: 'value'),
-            propertyRow(name: 'Property', value: 'value'),
-            propertyRow(name: 'Property', value: 'value'),
+            propertyRow(name: 'Description', value: data['info'].toString()),
+            // This container is a divider
+            Container(
+              margin: const EdgeInsets.all(15),
+              height: 1,
+              color: Colors.grey.withOpacity(0.5),
+            ),
+            propertyRow(name: 'URL', value: data['url'].toString()),
           ],
         ),
       ),
@@ -142,17 +148,29 @@ Widget propertyRow({required String name, required String value}) {
         borderRadius: BorderRadius.circular(7)),
     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
     margin: const EdgeInsets.all(5),
-    child: Row(
+    child: Column(
       children: [
-        Text(
-          name,
-          textAlign: TextAlign.start,
+        Row(
+          children: [
+            Text(
+              style: TextStyle(fontWeight: FontWeight.bold),
+              name,
+              textAlign: TextAlign.start,
+            ),
+            const Spacer(),
+            Text(
+              value.length > 20 ? '' : value,
+              textAlign: TextAlign.end,
+            )
+          ],
         ),
-        const Spacer(),
-        Text(
-          value,
-          textAlign: TextAlign.end,
-        )
+        if (value.length > 20)
+          Text(
+            overflow: TextOverflow.fade,
+            softWrap: true,
+            maxLines: 6,
+            value,
+          )
       ],
     ),
   );
