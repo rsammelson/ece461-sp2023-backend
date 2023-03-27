@@ -44,13 +44,14 @@ impl Scorer for FractionDependencies {
 
         println!("---");
         println!("{}", final_str);
-        println!("---");
+        
         
         let out_float = final_str.parse::<f32>()?;
 
         let score_ = 1.0 / out_float;
 
-        //println!("{:?}", score_);
+        println!("{}", score_);
+        println!("---");
     //use output num of dependencies to calc score
     //save or return score 
 
@@ -62,7 +63,8 @@ impl Scorer for FractionDependencies {
 
         Ok((
             Metric::FractionDependencies(FractionDependencies()), 
-            (-1.0),
+            (score_),
+            //(-1.0),
             // ((1.0/out_float)).into(),
         ))
         
