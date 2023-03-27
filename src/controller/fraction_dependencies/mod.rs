@@ -39,13 +39,14 @@ impl Scorer for FractionDependencies {
 
         println!("{:?}", out);
 
-        let mut out_str = String::from_utf8_lossy(&out.stdout);
+        let out_str = String::from_utf8_lossy(&out.stdout);
         let final_str = out_str.trim();
 
         println!("---");
         println!("{}", final_str);
         println!("---");
-        //let out_float = out_str.parse::<f32>()?;
+        
+        let out_float = final_str.parse::<f32>()?;
 
         //let score_ = 1.0 / out_float;
 
