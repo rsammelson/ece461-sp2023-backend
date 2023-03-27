@@ -40,6 +40,8 @@ impl Scorer for FractionDependencies {
         println!("{:?}", out);
 
         let out_str = String::from_utf8_lossy(&out.stdout);
+        out_str.pop();
+
         println!("---");
         println!("{}", out_str);
         println!("---");
