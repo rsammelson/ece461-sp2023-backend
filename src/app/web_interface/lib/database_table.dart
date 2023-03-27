@@ -66,7 +66,7 @@ class DatabaseRow extends StatelessWidget {
         ),
         DatabaseCell(
           width: MediaQuery.of(context).size.width / (cells.length),
-          text: '${cells['rating']}',
+          text: double.parse('${cells['rating']}').toStringAsFixed(2),
         ),
       ]),
       trailing: SizedBox(

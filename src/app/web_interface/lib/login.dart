@@ -39,7 +39,8 @@ class _LoginPageState extends State<LoginPage> {
     if (!invalidPass && !invalidUser) {
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: _userController.text, password: _passController.text);
+            email: '${_userController.text}@acme.project461',
+            password: _passController.text);
         _userController.clear();
         _passController.clear();
       } on FirebaseAuthException catch (e) {
@@ -87,10 +88,10 @@ class _LoginPageState extends State<LoginPage> {
         Padding(
           padding: EdgeInsets.only(bottom: 20, left: 50, right: 50),
           child: Text(
-            "Hello ${FirebaseAuth.instance.currentUser?.email}!",
+            "Hello ${FirebaseAuth.instance.currentUser?.email?.split('@')[0]}!",
             overflow: TextOverflow.fade,
             semanticsLabel:
-                "Hello ${FirebaseAuth.instance.currentUser?.email}!",
+                "Hello ${FirebaseAuth.instance.currentUser?.email?.split('@')[0]}!",
             softWrap: true,
             maxLines: 3,
             style: TextStyle(fontSize: 28),
