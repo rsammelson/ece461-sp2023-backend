@@ -13,6 +13,7 @@ class PackageRegistry {
   String curSortMethod = columns[0];
   List<Map<String, dynamic>>? _data;
   List<Map<String, dynamic>> selectedData = [];
+  List<Map<String, dynamic>> filteredData = [];
 
   // factory will return an instance, not necessarily creating a new one
   factory PackageRegistry() {
@@ -49,8 +50,9 @@ class PackageRegistry {
     //
     List<Map<String, dynamic>> newData = await grabData();
     _data = newData;
+    filteredData = newData;
 
-    return false;
+    return newData.isNotEmpty;
   }
 
   Future<List<Map<String, dynamic>>> grabData() async {
@@ -58,17 +60,22 @@ class PackageRegistry {
     //
     List<Map<String, dynamic>> newData = [];
     // Get query snapshot of collection 'packages'
-    QuerySnapshot<Map<String, dynamic>> firestoreDataSnapshot =
-        await FirebaseFirestore.instance.collection('/packages').get();
-    // Query snapshot .docs method returns a list of query snapshots
-    // of every document collection
-    // For every document query snapshot, take package data as mapping and add
-    // mapping to list of data
-    for (QueryDocumentSnapshot<Map<String, dynamic>> docSnapshot
-        in firestoreDataSnapshot.docs) {
-      newData.add(docSnapshot.data());
+    try {
+      QuerySnapshot<Map<String, dynamic>> firestoreDataSnapshot =
+          await FirebaseFirestore.instance.collection('/packages').get();
+      // Query snapshot .docs method returns a list of query snapshots
+      // of every document collection
+      // For every document query snapshot, take package data as mapping and add
+      // mapping to list of data
+      for (QueryDocumentSnapshot<Map<String, dynamic>> docSnapshot
+          in firestoreDataSnapshot.docs) {
+        newData.add(docSnapshot.data());
+      }
+      return newData;
+    } catch (e) {
+      print(e);
+      return [];
     }
-    return newData;
   }
 
   bool sortData() {

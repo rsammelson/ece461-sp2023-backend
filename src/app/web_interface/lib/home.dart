@@ -11,7 +11,9 @@ import 'wavy_bg.dart' show WavingBackground;
 class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
+    required this.importDataSuccess,
   });
+  final bool importDataSuccess;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,7 +22,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   final PackageRegistry _pr = PackageRegistry();
-  List<Map<String, dynamic>> filteredData = PackageRegistry().data;
+  bool refreshSuccess = false;
+
+  @override
+  void initState() {
+    refreshSuccess = widget.importDataSuccess;
+    super.initState();
+  }
 
   void editSelected(bool addValue, Map<String, dynamic> dataRow) {
     setState(() {
@@ -35,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _isAllSelected() {
-    for (Map<String, dynamic> row in filteredData) {
+    for (Map<String, dynamic> row in _pr.filteredData) {
       if (!_pr.selectedData.contains(row)) {
         return false;
       }
@@ -65,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 onChanged: (text, reason) {
                   setState(() {
-                    filteredData = _pr.searchData(text);
+                    _pr.filteredData = _pr.searchData(text);
                   });
                 },
                 controller: _searchController,
@@ -89,12 +97,11 @@ class _HomePageState extends State<HomePage> {
               primaryItems: [
                 CommandBarButton(
                   onPressed: () async {
-                    // Call method to refresh data (make sure filteredData is also adjusted)
-                    if (FirebaseAuth.instance.currentUser != null) {} // TODO
-                    await PackageRegistry().importData();
+                    // Call method to refresh data (make sure _pr.filteredData is also adjusted)
+                    refreshSuccess = await PackageRegistry().importData();
                     setState(() {
                       _searchController.clear();
-                      filteredData = PackageRegistry().data;
+                      _pr.filteredData = PackageRegistry().data;
                     });
                   },
                   icon: const Icon(FluentIcons.update_restore),
@@ -212,9 +219,10 @@ class _HomePageState extends State<HomePage> {
                           setState(
                             () {
                               if (value!) {
-                                // can't do _pr.selectedData = filteredData; because
+                                // can't do _pr.selectedData = _pr.filteredData; because
                                 // object is not copied
-                                for (Map<String, dynamic> row in filteredData) {
+                                for (Map<String, dynamic> row
+                                    in _pr.filteredData) {
                                   if (!_pr.selectedData.contains(row)) {
                                     _pr.selectedData.add(row);
                                   }
@@ -243,10 +251,15 @@ class _HomePageState extends State<HomePage> {
                     ),
                     // List of data
                     Expanded(
-                      child: DatabaseTable(
-                        data: filteredData,
-                        editSelected: editSelected,
-                      ),
+                      child: (widget.importDataSuccess || refreshSuccess)
+                          ? DatabaseTable(
+                              data: _pr.filteredData,
+                              editSelected: editSelected,
+                            )
+                          : RichText(
+                              text: TextSpan(
+                                  text:
+                                      'Could not load data. You may be signed out.')),
                     ),
                   ],
                 ),

@@ -44,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
         _userController.clear();
         _passController.clear();
       } on FirebaseAuthException catch (e) {
+        print(e);
         if (e.code.contains("password")) {
           invalidPass = true;
         } else if (e.code.contains("not-found")) {

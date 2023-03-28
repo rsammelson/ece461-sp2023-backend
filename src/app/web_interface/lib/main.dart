@@ -33,13 +33,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // set up data registry
-  if (FirebaseAuth.instance.currentUser != null) {} // TODO
-  bool importDataSuccess = await PackageRegistry().importData();
-  if (!importDataSuccess) {
-    // Error getting data from firebase
-  }
-
   runApp(const WebApp());
 }
 
@@ -68,24 +61,8 @@ class _WebAppState extends State<WebApp> with WidgetsBindingObserver {
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.paused:
-        print('Paused');
-        break;
-      case AppLifecycleState.resumed:
-        print('Resumed');
-        break;
-      case AppLifecycleState.inactive:
-        print('Inactive');
-        break;
-      case AppLifecycleState.detached:
-        print('Detached');
-        FirebaseAuth.instance.signOut();
-        break;
-      default:
-        print('Defaulted');
-        break;
+    if (state == AppLifecycleState.detached) {
+      FirebaseAuth.instance.signOut();
     }
   }
 
@@ -140,7 +117,12 @@ class _NavPageState extends State<NavPage> {
                 title: const Text(
                   "Home",
                 ),
-                body: const HomePage()),
+                body: FutureBuilder(
+                  builder: (context, snapshot) {
+                    return HomePage(importDataSuccess: snapshot.data ?? false);
+                  },
+                  future: PackageRegistry().importData(),
+                )),
             // Login navbar item
             PaneItem(
                 icon: const Icon(FluentIcons.contact),
