@@ -34,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     // user-not-found
     // invalid-email
     // too-many-requests
+    // permission-denied
 
     // Try to sign in user, or get error response
     if (!invalidPass && !invalidUser) {

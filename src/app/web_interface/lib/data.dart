@@ -22,8 +22,6 @@ class PackageRegistry {
 
   PackageRegistry._internal() {
     // initialization logic
-
-    // importData();
     _data = [];
   }
 
@@ -73,6 +71,7 @@ class PackageRegistry {
       }
       return newData;
     } catch (e) {
+      // usually = permission-denied
       print(e);
       return [];
     }

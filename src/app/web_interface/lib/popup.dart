@@ -161,6 +161,7 @@ Widget propertyRow({required String name, required String value}) {
           GestureDetector(
             onTap: () {
               if (name == 'URL') {
+                // TODO
                 print('Hyperlink');
               }
             },
