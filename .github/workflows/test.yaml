@@ -3,13 +3,34 @@
 # learned you can used echo from https://towardsdatascience.com/github-actions-everything-you-need-to-know-to-get-started-537f1dffa0ed 
 # learned you can use make commands from link.yaml adopted from the other team
 
+# pylint portion from Pylint action from GitHub Actions
+
 name: testing repo
 run-name: ${{github.actor}} is trying to do a pull request
 on: [pull_request]
 jobs: 
+  lint-python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{matrix.python-version}}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{matrix.python-version}}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+    - name: Analysing the code with pylint
+      run: |
+        pylint $(git ls-files '*.py')
   test-repo:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: make lint
       - run: make init-fake-submodules
       - run: make test

@@ -5,7 +5,7 @@ check: init-fake-submodules verify-format lint test
 verify-format:
 	cargo fmt --check
 
-lint:
+lint: verify-format
 	cargo clippy --tests -- -Dwarnings
 
 test:
