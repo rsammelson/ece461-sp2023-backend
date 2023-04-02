@@ -51,7 +51,7 @@ impl Scorer for FractionDependencies {
         let score_ = 1.0 / out_float;
 
         println!("{}", score_);
-        println!("---");
+        println!("--ahh--");
     //use output num of dependencies to calc score
     //save or return score 
 
