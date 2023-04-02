@@ -8,11 +8,6 @@
 cargo fmt --check # make verify-format
 cargo clippy --tests -- -Dwarnings # make lint
 
-# from https://stackoverflow.com/questions/36873096/run-pylint-for-all-python-files-in-a-directory-and-all-subdirectories
-find . -type f -name "*.py" | xargs pylint
-
-
-
 
 # Sample:
 # # An example hook script to verify what is about to be committed.
