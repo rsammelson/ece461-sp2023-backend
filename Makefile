@@ -5,8 +5,11 @@ check: init-fake-submodules verify-format lint test
 verify-format:
 	cargo fmt --check
 
-lint:
+
+# python linting command from https://stackoverflow.com/questions/36873096/run-pylint-for-all-python-files-in-a-directory-and-all-subdirectories
+lint: verify-format
 	cargo clippy --tests -- -Dwarnings
+	find . -type f -name "*.py" | xargs pylint
 
 test:
 	cargo build
