@@ -1,4 +1,3 @@
-
+""" For testing pylint linter"""
 
 print("Hello World!")
-print("How are you?")
