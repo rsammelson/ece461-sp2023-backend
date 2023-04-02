@@ -1,6 +1,6 @@
 use crate::{
     api::GithubRepositoryName,
-    controller::{fractionReviewed, tests::get_fake_repository, Metric, Scorer},
+    controller::{fraction_reviewed, tests::get_fake_repository, Metric, Scorer},
 };
 
 use tokio::sync::Mutex;
