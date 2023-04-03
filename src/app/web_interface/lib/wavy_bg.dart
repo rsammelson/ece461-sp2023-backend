@@ -49,7 +49,6 @@ class _WavingBackgroundState extends State<WavingBackground>
   late final AnimationController _animationController = AnimationController(
       vsync: this,
       value: 0.0,
-      upperBound: 1.0,
       lowerBound: -1.0,
       duration: const Duration(milliseconds: 5000))
     ..repeat();

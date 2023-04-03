@@ -58,9 +58,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          //
           // Search bar
-          //
           Container(
               constraints: const BoxConstraints(maxWidth: 500),
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -79,15 +77,12 @@ class _HomePageState extends State<HomePage> {
                 controller: _searchController,
                 items: const [],
                 style: const TextStyle(fontSize: 16),
-                clearButtonEnabled: true,
                 leadingIcon: const Padding(
                   padding: EdgeInsets.all(8),
                   child: Icon(FluentIcons.search),
                 ),
               )),
-          //
           // Command Bar / Filter options
-          //
           Padding(
             padding: const EdgeInsets.only(left: 50, right: 50, bottom: 10),
             child: CommandBar(
@@ -102,6 +97,7 @@ class _HomePageState extends State<HomePage> {
                     setState(() {
                       _searchController.clear();
                       _pr.filteredData = PackageRegistry().data;
+                      _pr.selectedData = [];
                     });
                   },
                   icon: const Icon(FluentIcons.update_restore),
@@ -195,9 +191,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          //
           // Main body
-          //
           Expanded(
             child: Container(
               padding: const EdgeInsets.only(
@@ -219,8 +213,7 @@ class _HomePageState extends State<HomePage> {
                           setState(
                             () {
                               if (value!) {
-                                // can't do _pr.selectedData = _pr.filteredData; because
-                                // object is not copied
+                                // can't do _pr.selectedData = _pr.filteredData; because object is not copied
                                 for (Map<String, dynamic> row
                                     in _pr.filteredData) {
                                   if (!_pr.selectedData.contains(row)) {
@@ -256,10 +249,7 @@ class _HomePageState extends State<HomePage> {
                               data: _pr.filteredData,
                               editSelected: editSelected,
                             )
-                          : RichText(
-                              text: TextSpan(
-                                  text:
-                                      'Could not load data. You may be signed out.')),
+                          : Text('Could not load data. You may be signed out.'),
                     ),
                   ],
                 ),

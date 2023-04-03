@@ -194,6 +194,9 @@ class _LoginPageState extends State<LoginPage> {
           },
           isPassword: true,
           hintText: 'Password',
+          onSubmit: (String? value) async {
+            await signInBtnPress();
+          },
         ),
       ),
       if (tooManyAttempts)
@@ -232,7 +235,6 @@ class _LoginPageState extends State<LoginPage> {
                   )
                 : Text(
                     textAlign: TextAlign.center,
-                    overflow: TextOverflow.fade,
                     maxLines: 1,
                     'Sign in',
                     style: TextStyle(color: Colors.white, fontSize: 20),
@@ -251,81 +253,53 @@ class LoginTextBox extends StatelessWidget {
       this.invalidText,
       this.textFieldController,
       this.isPassword = false,
-      this.showInvalidText = false,
       this.invalid = false,
-      this.show = true,
-      this.opacity = 1,
       this.showPass = false,
-      this.showPassClick});
+      this.showPassClick,
+      this.onSubmit});
   final String? hintText;
   final String? invalidText;
   final TextEditingController? textFieldController;
   final bool isPassword;
   final bool invalid;
-  final bool showInvalidText;
-  final bool show;
   final bool showPass;
-  final double opacity;
   final void Function()? showPassClick;
+  final void Function(String?)? onSubmit;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      height: show ? (showInvalidText ? 76 : 52) : 0,
-      duration: const Duration(milliseconds: 150),
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-          decoration: BoxDecoration(
-              color: offwhiteDark,
-              border: Border.all(
-                  color: showInvalidText || invalid ? Colors.red : offwhiteDark,
-                  width: 2),
-              borderRadius: BorderRadius.circular(12)),
-          constraints: const BoxConstraints(maxWidth: 500),
-          width: MediaQuery.of(context).size.width / 1.5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (showInvalidText)
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Text(
-                    invalidText ?? "Incorrect $hintText",
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              TextBox(
-                suffixMode: isPassword
-                    ? OverlayVisibilityMode.editing
-                    : OverlayVisibilityMode.never,
-                suffix: IconButton(
-                  icon: Icon(
-                    showPass
-                        ? FluentIcons.visually_impaired
-                        : FluentIcons.red_eye12,
-                    size: 26,
-                  ),
-                  onPressed: showPassClick,
-                ),
-                style: const TextStyle(fontSize: 18),
-                foregroundDecoration: BoxDecoration(
-                    color: Colors.transparent,
-                    border: Border.all(color: Colors.transparent)),
-                placeholder: hintText,
-                controller: textFieldController,
-                obscureText: isPassword && !showPass,
-                cursorColor: showInvalidText ? offwhiteDark : Colors.black,
-                decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    border: Border.all(color: Colors.transparent)),
-              ),
-            ],
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      decoration: BoxDecoration(
+          color: offwhiteDark,
+          border:
+              Border.all(color: invalid ? Colors.red : offwhiteDark, width: 2),
+          borderRadius: BorderRadius.circular(12)),
+      constraints: const BoxConstraints(maxWidth: 500),
+      width: MediaQuery.of(context).size.width / 1.5,
+      child: TextBox(
+        onSubmitted: onSubmit,
+        suffixMode: isPassword
+            ? OverlayVisibilityMode.editing
+            : OverlayVisibilityMode.never,
+        suffix: IconButton(
+          icon: Icon(
+            showPass ? FluentIcons.visually_impaired : FluentIcons.red_eye12,
+            size: 26,
           ),
+          onPressed: showPassClick,
         ),
+        style: const TextStyle(fontSize: 18),
+        foregroundDecoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border.all(color: Colors.transparent)),
+        placeholder: hintText,
+        controller: textFieldController,
+        obscureText: isPassword && !showPass,
+        decoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border.all(color: Colors.transparent)),
       ),
     );
   }

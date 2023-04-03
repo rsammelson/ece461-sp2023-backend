@@ -31,18 +31,6 @@ class PackageRegistry {
 
   set data(List<Map<String, dynamic>> values) => _data = values;
 
-  bool formatData() {
-    if (_data == null || _data!.isEmpty) {
-      return false;
-    }
-
-    bool didFormat = false;
-    for (int i = 0; i < _data!.length; i++) {
-      // format mapping?
-    }
-    return didFormat;
-  }
-
   Future<bool> importData() async {
     // Grab data stored in the cloud and set data value of this class
     //
@@ -61,10 +49,8 @@ class PackageRegistry {
     try {
       QuerySnapshot<Map<String, dynamic>> firestoreDataSnapshot =
           await FirebaseFirestore.instance.collection('/packages').get();
-      // Query snapshot .docs method returns a list of query snapshots
-      // of every document collection
-      // For every document query snapshot, take package data as mapping and add
-      // mapping to list of data
+      // Query snapshot .docs method returns a list of query snapshots of every document collection
+      // For every document query snapshot, take package data as mapping and add mapping to list of data
       for (QueryDocumentSnapshot<Map<String, dynamic>> docSnapshot
           in firestoreDataSnapshot.docs) {
         newData.add(docSnapshot.data());
@@ -182,9 +168,7 @@ class PackageRegistry {
 
     List<Map<String, dynamic>> filtered = [];
 
-    // Search name category of all data to see if
-    // regardless of capitalization
-    // does the keyword show up anywhere in the package name
+    // Search name category of all data to see if regardless of capitalization does the keyword show up anywhere in the package name
     for (Map<String, dynamic> row in _data!) {
       if ('${row['name']}'.toLowerCase().contains(keyword)) {
         filtered.add(row);
