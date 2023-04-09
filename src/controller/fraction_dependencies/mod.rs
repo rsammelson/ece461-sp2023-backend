@@ -40,18 +40,19 @@ impl Scorer for FractionDependencies {
 
         println!("{:?}", out);
 
-        let out_str = String::from_utf8_lossy(&out.stdout);
-        let final_str = out_str.trim();
+        //let out_str = String::from_utf8_lossy(&out.stdout);
+        //let final_str = out_str.trim();
 
         println!("T2");
         //println!("{}", final_str);
         
         
-        let out_float = final_str.parse::<f32>()?;
+        //let out_float = final_str.parse::<f32>()?;
 
-        let score_ = 1.0 / out_float;
+        //let score_ = 1.0 / out_float;
+        let score_ = 1;
 
-        println!("{}", score_);
+        //println!("{}", score_);
         //println!("---");
     //use output num of dependencies to calc score
     //save or return score 
