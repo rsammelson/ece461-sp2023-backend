@@ -74,7 +74,7 @@ where
 
     log::log(
         LogLevel::All,
-        &format!(tasks),
+        &format!("{}", tasks),
     );
 
     log::log(
