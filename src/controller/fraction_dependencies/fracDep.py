@@ -38,8 +38,9 @@ def findDeps(repo_identifier):
             return count
     else:
         #print("error, no path")
-        print(-1)
+        print("-1")
         return -1
+        
 
 if findDeps(sys.argv[1]) == -1:
     exit(1)
