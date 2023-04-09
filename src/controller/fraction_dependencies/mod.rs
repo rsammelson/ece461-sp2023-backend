@@ -66,7 +66,7 @@ impl Scorer for FractionDependencies {
             //((score_).into()),
             (-1.0),
             // ((1.0/out_float)).into(),
-        ))
+        ));
         
     }
 }
