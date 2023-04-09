@@ -44,15 +44,15 @@ impl Scorer for FractionDependencies {
         let final_str = out_str.trim();
 
         //println!("T2");
-        println!("({})", final_str);
+        //println!("({})", final_str);
         
-        println!("T1");
+        //println!("T1");
         let out_float = final_str.parse::<f32>()?;
-        println!("T2");
+        //println!("T2");
         
         let score_ = 1.0 / out_float;
-        println!("{}", score_);
-        let score_ = 1;
+        //println!("{}", score_);
+        //let score_ = 1;
 
         //println!("{}", score_);
         //println!("---");
