@@ -58,7 +58,6 @@ class PackageRegistry {
       return newData;
     } catch (e) {
       // usually = permission-denied
-      print(e);
       return [];
     }
   }

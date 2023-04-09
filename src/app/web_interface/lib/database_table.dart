@@ -101,7 +101,8 @@ class DatabaseCell extends StatelessWidget {
       width: width,
       padding: EdgeInsets.symmetric(horizontal: hpad!),
       child: Text(
-        text ?? "",
+        text ?? '',
+        semanticsLabel: text ?? '',
         textAlign: TextAlign.center,
       ),
     );

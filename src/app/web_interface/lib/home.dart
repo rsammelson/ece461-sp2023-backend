@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
@@ -101,7 +100,10 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                   icon: const Icon(FluentIcons.update_restore),
-                  label: const Text("Refresh"),
+                  label: const Text(
+                    "Refresh",
+                    semanticsLabel: 'Refresh',
+                  ),
                 ),
                 CommandBarButton(
                     onPressed: () async {
@@ -110,7 +112,10 @@ class _HomePageState extends State<HomePage> {
                       setState(() {});
                     },
                     icon: const Icon(FluentIcons.add),
-                    label: const Text('Add')),
+                    label: const Text(
+                      'Add',
+                      semanticsLabel: 'Add',
+                    )),
                 CommandBarButton(
                   onPressed: _pr.selectedData.isEmpty
                       ? null
@@ -123,6 +128,7 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(FluentIcons.delete),
                   label: Text(
                     'Delete${_pr.selectedData.isEmpty ? '' : ' (${_pr.selectedData.length})'}',
+                    semanticsLabel: 'Delete selected',
                   ),
                 ),
                 CommandBarButton(
@@ -137,13 +143,17 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(FluentIcons.download),
                   label: Text(
                     'Update${_pr.selectedData.length <= 1 ? '' : ' All'}',
+                    semanticsLabel: 'Update selected',
                   ),
                 ),
                 const CommandBarSeparator(),
                 CommandBarButton(
                   onPressed: () {},
                   icon: DropDownButton(
-                    title: const Text("Sort"),
+                    title: const Text(
+                      "Sort",
+                      semanticsLabel: 'Sort method selection dropdown',
+                    ),
                     items: [
                       for (int i = 0; i < columns.length - 1; i++)
                         MenuFlyoutItem(
@@ -163,6 +173,7 @@ class _HomePageState extends State<HomePage> {
                 CommandBarButton(
                     onPressed: () {},
                     icon: Checkbox(
+                      semanticLabel: 'Sort ascending or descending',
                       checked: _pr.isSortAscending,
                       onChanged: (value) {
                         setState(() {
@@ -249,7 +260,8 @@ class _HomePageState extends State<HomePage> {
                               data: _pr.filteredData,
                               editSelected: editSelected,
                             )
-                          : Text('Could not load data. You may be signed out.'),
+                          : const Text(
+                              'Could not load data. You may be signed out.'),
                     ),
                   ],
                 ),

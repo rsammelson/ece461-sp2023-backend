@@ -145,7 +145,7 @@ Widget propertyRow({required String name, required String value}) {
           child: Row(
             children: [
               Text(
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
                 name,
                 textAlign: TextAlign.start,
               ),
@@ -162,7 +162,6 @@ Widget propertyRow({required String name, required String value}) {
             onTap: () {
               if (name == 'URL') {
                 // TODO
-                print('Hyperlink');
               }
             },
             child: Text(
