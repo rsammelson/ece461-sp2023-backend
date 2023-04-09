@@ -25,13 +25,13 @@ def findDeps(repo_identifier):
     #print("\n\n\n",file,"\n\n\n")
 
     exist = os.path.isfile(file)
-    print("Returning... ")
+    #print("Returning... ")
 
     if exist:
         with open(file) as json_file:
             data = json.load(json_file)
             if not("dependencies" in data.keys()):
-                print(1)
+                #print(1)
                 return 1 # no dependencies
             count = len(data["dependencies"])
             print(count)
