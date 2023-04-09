@@ -29,7 +29,8 @@ impl Scorer for FractionDependencies {
         // println!("{}", repo_identifier);
         // for casting to a string see https://doc.rust-lang.org/rust-by-example/conversion/string.html
         let repo_id_str : String = repo_identifier.to_string();
-        // println!("{}", repo_id_str);
+        //println!("{}", repo_id_str);
+        println!("T1")
 
         let out = Command::new("python3")
                         .arg("src/controller/fraction_dependencies/fracDep.py")
@@ -42,7 +43,7 @@ impl Scorer for FractionDependencies {
         let out_str = String::from_utf8_lossy(&out.stdout);
         let final_str = out_str.trim();
 
-        //println!("---");
+        println!("T2");
         //println!("{}", final_str);
         
         
