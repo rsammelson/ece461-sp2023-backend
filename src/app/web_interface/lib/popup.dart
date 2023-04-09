@@ -111,21 +111,11 @@ Future<String> showPropertiesDialog(BuildContext context,
           children: [
             propertyRow(name: 'Name', value: data['name'].toString()),
             propertyRow(name: 'ID', value: data['id'].toString()),
-            propertyRow(name: 'Rating', value: data['rating'].toString()),
+            propertyRow(
+                name: 'Rating',
+                value: double.parse('${data['rating']}').toStringAsFixed(2)),
             propertyRow(name: 'Version', value: data['version'].toString()),
-            // This container is a divider
-            Container(
-              margin: const EdgeInsets.all(15),
-              height: 1,
-              color: Colors.grey.withOpacity(0.5),
-            ),
             propertyRow(name: 'Description', value: data['info'].toString()),
-            // This container is a divider
-            Container(
-              margin: const EdgeInsets.all(15),
-              height: 1,
-              color: Colors.grey.withOpacity(0.5),
-            ),
             propertyRow(name: 'URL', value: data['url'].toString()),
           ],
         ),
@@ -150,26 +140,42 @@ Widget propertyRow({required String name, required String value}) {
     margin: const EdgeInsets.all(5),
     child: Column(
       children: [
-        Row(
-          children: [
-            Text(
-              style: TextStyle(fontWeight: FontWeight.bold),
-              name,
-              textAlign: TextAlign.start,
-            ),
-            const Spacer(),
-            Text(
-              value.length > 20 ? '' : value,
-              textAlign: TextAlign.end,
-            )
-          ],
+        Padding(
+          padding: EdgeInsets.only(bottom: (value.length > 20) ? 7 : 0),
+          child: Row(
+            children: [
+              Text(
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                name,
+                textAlign: TextAlign.start,
+              ),
+              const Spacer(),
+              Text(
+                value.length > 20 ? '' : value,
+                textAlign: TextAlign.end,
+              )
+            ],
+          ),
         ),
         if (value.length > 20)
-          Text(
-            overflow: TextOverflow.fade,
-            softWrap: true,
-            maxLines: 6,
-            value,
+          GestureDetector(
+            onTap: () {
+              if (name == 'URL') {
+                // TODO
+              }
+            },
+            child: Text(
+              style: TextStyle(
+                  fontSize: 14,
+                  color: (name == 'URL') ? Colors.blue : Colors.black,
+                  decoration: (name == 'URL')
+                      ? TextDecoration.underline
+                      : TextDecoration.none),
+              overflow: TextOverflow.fade,
+              softWrap: true,
+              maxLines: 6,
+              value,
+            ),
           )
       ],
     ),

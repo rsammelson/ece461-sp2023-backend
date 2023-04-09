@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
@@ -11,7 +10,9 @@ import 'wavy_bg.dart' show WavingBackground;
 class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
+    required this.importDataSuccess,
   });
+  final bool importDataSuccess;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,7 +21,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   final PackageRegistry _pr = PackageRegistry();
-  List<Map<String, dynamic>> filteredData = PackageRegistry().data;
+  bool refreshSuccess = false;
+
+  @override
+  void initState() {
+    refreshSuccess = widget.importDataSuccess;
+    super.initState();
+  }
 
   void editSelected(bool addValue, Map<String, dynamic> dataRow) {
     setState(() {
@@ -35,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _isAllSelected() {
-    for (Map<String, dynamic> row in filteredData) {
+    for (Map<String, dynamic> row in _pr.filteredData) {
       if (!_pr.selectedData.contains(row)) {
         return false;
       }
@@ -50,9 +57,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          //
           // Search bar
-          //
           Container(
               constraints: const BoxConstraints(maxWidth: 500),
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -65,21 +70,18 @@ class _HomePageState extends State<HomePage> {
                 },
                 onChanged: (text, reason) {
                   setState(() {
-                    filteredData = _pr.searchData(text);
+                    _pr.filteredData = _pr.searchData(text);
                   });
                 },
                 controller: _searchController,
                 items: const [],
                 style: const TextStyle(fontSize: 16),
-                clearButtonEnabled: true,
                 leadingIcon: const Padding(
                   padding: EdgeInsets.all(8),
                   child: Icon(FluentIcons.search),
                 ),
               )),
-          //
           // Command Bar / Filter options
-          //
           Padding(
             padding: const EdgeInsets.only(left: 50, right: 50, bottom: 10),
             child: CommandBar(
@@ -89,16 +91,19 @@ class _HomePageState extends State<HomePage> {
               primaryItems: [
                 CommandBarButton(
                   onPressed: () async {
-                    // Call method to refresh data (make sure filteredData is also adjusted)
-                    if (FirebaseAuth.instance.currentUser != null) {} // TODO
-                    await PackageRegistry().importData();
+                    // Call method to refresh data (make sure _pr.filteredData is also adjusted)
+                    refreshSuccess = await PackageRegistry().importData();
                     setState(() {
                       _searchController.clear();
-                      filteredData = PackageRegistry().data;
+                      _pr.filteredData = PackageRegistry().data;
+                      _pr.selectedData = [];
                     });
                   },
                   icon: const Icon(FluentIcons.update_restore),
-                  label: const Text("Refresh"),
+                  label: const Text(
+                    "Refresh",
+                    semanticsLabel: 'Refresh',
+                  ),
                 ),
                 CommandBarButton(
                     onPressed: () async {
@@ -107,7 +112,10 @@ class _HomePageState extends State<HomePage> {
                       setState(() {});
                     },
                     icon: const Icon(FluentIcons.add),
-                    label: const Text('Add')),
+                    label: const Text(
+                      'Add',
+                      semanticsLabel: 'Add',
+                    )),
                 CommandBarButton(
                   onPressed: _pr.selectedData.isEmpty
                       ? null
@@ -120,6 +128,7 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(FluentIcons.delete),
                   label: Text(
                     'Delete${_pr.selectedData.isEmpty ? '' : ' (${_pr.selectedData.length})'}',
+                    semanticsLabel: 'Delete selected',
                   ),
                 ),
                 CommandBarButton(
@@ -134,13 +143,17 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(FluentIcons.download),
                   label: Text(
                     'Update${_pr.selectedData.length <= 1 ? '' : ' All'}',
+                    semanticsLabel: 'Update selected',
                   ),
                 ),
                 const CommandBarSeparator(),
                 CommandBarButton(
                   onPressed: () {},
                   icon: DropDownButton(
-                    title: const Text("Sort"),
+                    title: const Text(
+                      "Sort",
+                      semanticsLabel: 'Sort method selection dropdown',
+                    ),
                     items: [
                       for (int i = 0; i < columns.length - 1; i++)
                         MenuFlyoutItem(
@@ -160,6 +173,7 @@ class _HomePageState extends State<HomePage> {
                 CommandBarButton(
                     onPressed: () {},
                     icon: Checkbox(
+                      semanticLabel: 'Sort ascending or descending',
                       checked: _pr.isSortAscending,
                       onChanged: (value) {
                         setState(() {
@@ -188,9 +202,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          //
           // Main body
-          //
           Expanded(
             child: Container(
               padding: const EdgeInsets.only(
@@ -212,9 +224,9 @@ class _HomePageState extends State<HomePage> {
                           setState(
                             () {
                               if (value!) {
-                                // can't do _pr.selectedData = filteredData; because
-                                // object is not copied
-                                for (Map<String, dynamic> row in filteredData) {
+                                // can't do _pr.selectedData = _pr.filteredData; because object is not copied
+                                for (Map<String, dynamic> row
+                                    in _pr.filteredData) {
                                   if (!_pr.selectedData.contains(row)) {
                                     _pr.selectedData.add(row);
                                   }
@@ -243,10 +255,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                     // List of data
                     Expanded(
-                      child: DatabaseTable(
-                        data: filteredData,
-                        editSelected: editSelected,
-                      ),
+                      child: (widget.importDataSuccess || refreshSuccess)
+                          ? DatabaseTable(
+                              data: _pr.filteredData,
+                              editSelected: editSelected,
+                            )
+                          : const Text(
+                              'Could not load data. You may be signed out.'),
                     ),
                   ],
                 ),

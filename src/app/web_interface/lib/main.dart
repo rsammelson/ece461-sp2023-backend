@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 
 import 'data.dart' show PackageRegistry;
-import 'firebase_api.dart' show DefaultFirebaseOptions;
+import 'firebase_options.dart' show DefaultFirebaseOptions;
 import 'home.dart' show HomePage;
 import 'login.dart' show LoginPage;
 
@@ -21,9 +21,6 @@ const double trailingSize = 100.0;
 const String siteName = 'ACME Package Registry';
 const Color offwhite = Color.fromARGB(255, 241, 241, 241);
 const Color offwhiteDark = Color.fromARGB(255, 222, 222, 222);
-// Do we have IDs for each package?
-// Use Firebase for auth?
-// What are the properties
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,13 +29,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  // set up data registry
-  if (FirebaseAuth.instance.currentUser != null) {} // TODO
-  bool importDataSuccess = await PackageRegistry().importData();
-  if (!importDataSuccess) {
-    // Error getting data from firebase
-  }
 
   runApp(const WebApp());
 }
@@ -68,24 +58,8 @@ class _WebAppState extends State<WebApp> with WidgetsBindingObserver {
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.paused:
-        print('Paused');
-        break;
-      case AppLifecycleState.resumed:
-        print('Resumed');
-        break;
-      case AppLifecycleState.inactive:
-        print('Inactive');
-        break;
-      case AppLifecycleState.detached:
-        print('Detached');
-        FirebaseAuth.instance.signOut();
-        break;
-      default:
-        print('Defaulted');
-        break;
+    if (state == AppLifecycleState.detached) {
+      FirebaseAuth.instance.signOut();
     }
   }
 
@@ -140,7 +114,12 @@ class _NavPageState extends State<NavPage> {
                 title: const Text(
                   "Home",
                 ),
-                body: const HomePage()),
+                body: FutureBuilder(
+                  builder: (context, snapshot) {
+                    return HomePage(importDataSuccess: snapshot.data ?? false);
+                  },
+                  future: PackageRegistry().importData(),
+                )),
             // Login navbar item
             PaneItem(
                 icon: const Icon(FluentIcons.contact),

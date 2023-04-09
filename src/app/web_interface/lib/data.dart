@@ -13,6 +13,7 @@ class PackageRegistry {
   String curSortMethod = columns[0];
   List<Map<String, dynamic>>? _data;
   List<Map<String, dynamic>> selectedData = [];
+  List<Map<String, dynamic>> filteredData = [];
 
   // factory will return an instance, not necessarily creating a new one
   factory PackageRegistry() {
@@ -21,21 +22,7 @@ class PackageRegistry {
 
   PackageRegistry._internal() {
     // initialization logic
-
-    // data = grabData();
-    _data = [
-      {
-        "name": "Package",
-        "rating": 1.5,
-        "id": 1,
-        "info": "Extra desc",
-        "version": "1.5.6+1",
-        "url": "https://console.firebase.google.com"
-      },
-    ];
-
-    // format data on init
-    formatData();
+    _data = [];
   }
 
   // rest of class as normal
@@ -44,47 +31,53 @@ class PackageRegistry {
 
   set data(List<Map<String, dynamic>> values) => _data = values;
 
-  bool formatData() {
-    if (_data == null || _data!.isEmpty) {
-      return false;
-    }
-
-    bool didFormat = false;
-    for (int i = 0; i < _data!.length; i++) {
-      // format mapping?
-    }
-    return didFormat;
-  }
-
   Future<bool> importData() async {
     // Grab data stored in the cloud and set data value of this class
-    // FirebaseFirestore.instance.collection(collectionPath)
-    List<Map<String, dynamic>> newData = [];
-    var firestoreData =
-        await FirebaseFirestore.instance.collection('/packages').get();
-    for (var ff in firestoreData.docs) {
-      newData.add(ff.data());
-    }
+    //
+    List<Map<String, dynamic>> newData = await grabData();
     _data = newData;
+    filteredData = newData;
 
-    return false;
+    return newData.isNotEmpty;
   }
 
-  List<List<dynamic>> grabData() {
+  Future<List<Map<String, dynamic>>> grabData() async {
     // Grab data stored in the cloud and return it
-    return [];
+    //
+    List<Map<String, dynamic>> newData = [];
+    // Get query snapshot of collection 'packages'
+    try {
+      QuerySnapshot<Map<String, dynamic>> firestoreDataSnapshot =
+          await FirebaseFirestore.instance.collection('/packages').get();
+      // Query snapshot .docs method returns a list of query snapshots of every document collection
+      // For every document query snapshot, take package data as mapping and add mapping to list of data
+      for (QueryDocumentSnapshot<Map<String, dynamic>> docSnapshot
+          in firestoreDataSnapshot.docs) {
+        newData.add(docSnapshot.data());
+      }
+      return newData;
+    } catch (e) {
+      // usually = permission-denied
+      return [];
+    }
   }
 
   bool sortData() {
+    // Sort data based on variables that were set
+    // isSortAscending
+    // curSortMethod
+
+    // If no data, nothing to sort
     if (_data == null || _data!.isEmpty) {
       return false;
     }
 
+    // Decide which column to sort
     if (curSortMethod == columns[0]) {
       _data!.sort(
         (a, b) => isSortAscending
-            ? int.parse(a['id']).compareTo(int.parse(b['id']))
-            : int.parse(b['id']).compareTo(int.parse(a['id'])),
+            ? int.parse('${a['id']}').compareTo(int.parse('${b['id']}'))
+            : int.parse('${b['id']}').compareTo(int.parse('${a['id']}')),
       );
       return true;
     } else if (curSortMethod == columns[1]) {
@@ -152,8 +145,12 @@ class PackageRegistry {
     } else if (curSortMethod == columns[3]) {
       _data!.sort(
         (a, b) => isSortAscending
-            ? '${a[3]}'.toLowerCase().compareTo('${b['rating']}'.toLowerCase())
-            : '${b[3]}'.toLowerCase().compareTo('${a['rating']}'.toLowerCase()),
+            ? '${a['rating']}'
+                .toLowerCase()
+                .compareTo('${b['rating']}'.toLowerCase())
+            : '${b['rating']}'
+                .toLowerCase()
+                .compareTo('${a['rating']}'.toLowerCase()),
       );
       return true;
     } else {
@@ -170,6 +167,7 @@ class PackageRegistry {
 
     List<Map<String, dynamic>> filtered = [];
 
+    // Search name category of all data to see if regardless of capitalization does the keyword show up anywhere in the package name
     for (Map<String, dynamic> row in _data!) {
       if ('${row['name']}'.toLowerCase().contains(keyword)) {
         filtered.add(row);
