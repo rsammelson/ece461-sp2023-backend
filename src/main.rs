@@ -73,6 +73,11 @@ where
     output::console_output_sorted::print(tasks).await;
 
     log::log(
+        LogLevel::All,
+        &format!(tasks),
+    );
+
+    log::log(
         LogLevel::Minimal,
         &format!("Done with run started at {start_time}"),
     );

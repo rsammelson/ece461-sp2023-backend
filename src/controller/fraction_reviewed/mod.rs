@@ -22,5 +22,10 @@ impl Scorer for FractionReviewed {
         );
 
         Ok((Metric::FractionReviewed(FractionReviewed()), -1.))
+
+        log::log(
+            LogLevel::All,
+            &format!("Done analyzing FractionReviewed for {repo_identifier}"),
+        );
     }
 }
