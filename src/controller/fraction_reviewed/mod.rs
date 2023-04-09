@@ -21,6 +21,6 @@ impl Scorer for FractionReviewed {
             &format!("Starting to analyze FractionReviewed for {repo_identifier}"),
         );
 
-        Ok((Metric::FractionReviewed(FractionReviewed()), -1.));
+        Ok((Metric::FractionReviewed(FractionReviewed()), -1.))
     }
 }
