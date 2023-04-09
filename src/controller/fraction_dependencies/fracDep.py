@@ -25,6 +25,7 @@ def findDeps(repo_identifier):
     #print("\n\n\n",file,"\n\n\n")
 
     exist = os.path.isfile(file)
+    #print("Returning... ")
 
     if exist:
         with open(file) as json_file:
@@ -37,6 +38,7 @@ def findDeps(repo_identifier):
             return count
     else:
         #print("error, no path")
+        print(-1)
         return -1
 
 if findDeps(sys.argv[1]) == -1:
