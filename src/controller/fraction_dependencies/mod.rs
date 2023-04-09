@@ -57,7 +57,7 @@ impl Scorer for FractionDependencies {
 
         log::log(
             LogLevel::All,
-            &format!("Done analyzing FractionDependencies for {repo_identifier}"),
+            &format!("Done analyzing FractionDependencies for {repo_identifier} with score {(score_).into()}"),
         );
 
 
