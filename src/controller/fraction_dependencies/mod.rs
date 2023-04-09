@@ -30,7 +30,7 @@ impl Scorer for FractionDependencies {
         // for casting to a string see https://doc.rust-lang.org/rust-by-example/conversion/string.html
         let repo_id_str : String = repo_identifier.to_string();
         //println!("{}", repo_id_str);
-        println!("T1")
+        println!("T1");
 
         let out = Command::new("python3")
                         .arg("src/controller/fraction_dependencies/fracDep.py")
