@@ -31,11 +31,11 @@ def findDeps(repo_identifier):
         with open(file) as json_file:
             data = json.load(json_file)
             if not("dependencies" in data.keys()):
-                #print(1)
-                return 1 # no dependencies
+                print("1")
+                return 0 # no dependencies
             count = len(data["dependencies"])
             print(count)
-            print("111")
+            #print("111")
             return 0
         print("David")
     else:
