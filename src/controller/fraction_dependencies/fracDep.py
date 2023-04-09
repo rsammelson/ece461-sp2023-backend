@@ -30,20 +30,18 @@ def findDeps(repo_identifier):
     if exist:
         with open(file) as json_file:
             data = json.load(json_file)
-            print("__________________")
-            print(data)
-            print("__________________")
             if not("dependencies" in data.keys()):
                 #print(1)
                 return 1 # no dependencies
             count = len(data["dependencies"])
             print(count)
-            return count
+            print("111")
+            return 0
         print("David")
     else:
         #print("error, no path")
         print("-1")
-        return -1
+        return 0
         
 
 if findDeps(sys.argv[1]) == -1:
