@@ -29,10 +29,10 @@ def findDeps(repo_identifier):
 
     if exist:
         with open(file) as json_file:
-            print("__________________")
-            print(json_file)
-            print("__________________")
             data = json.load(json_file)
+            print("__________________")
+            print(data)
+            print("__________________")
             if not("dependencies" in data.keys()):
                 #print(1)
                 return 1 # no dependencies
