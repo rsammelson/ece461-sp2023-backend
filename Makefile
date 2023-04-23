@@ -27,4 +27,4 @@ exports:
 
 run: exports
 	./run build
-	./run <file_with_repo_url> > tmp_file.txt
+	./run URL_FILE > tmp_file.txt
