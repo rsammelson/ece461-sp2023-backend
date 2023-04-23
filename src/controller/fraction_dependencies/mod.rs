@@ -48,9 +48,9 @@ impl Scorer for FractionDependencies {
             ),
         );
 
-        Ok(
+        Ok((
             Metric::FractionDependencies(FractionDependencies()),
-            ((score_).into()),
-        )
+            (score_).into(),
+        ))
     }
 }
