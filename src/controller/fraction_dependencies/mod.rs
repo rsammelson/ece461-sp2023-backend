@@ -29,35 +29,21 @@ impl Scorer for FractionDependencies {
         // println!("{}", repo_identifier);
         // for casting to a string see https://doc.rust-lang.org/rust-by-example/conversion/string.html
         let repo_id_str : String = repo_identifier.to_string();
-        //println!("{}", repo_id_str);
         
-
         let out = Command::new("python3")
-                        .arg("src/controller/fraction_dependencies/fracDep.py")
+                        .arg("src/controller/fraction_dependencies/frac_dep.py")
                         .arg(repo_id_str)
                         .output()
                         .expect("file.py broke :(");
 
-        println!("{:?}", out);
+        //println!("{:?}", out);
 
         let out_str = String::from_utf8_lossy(&out.stdout);
         let final_str = out_str.trim();
 
-        //println!("T2");
-        //println!("({})", final_str);
-        
-        //println!("T1");
         let out_float = final_str.parse::<f32>()?;
-        //println!("T2");
         
         let score_ = 1.0 / out_float;
-        //println!("{}", score_);
-        //let score_ = 1;
-
-        //println!("{}", score_);
-        //println!("---");
-    //use output num of dependencies to calc score
-    //save or return score 
 
         log::log(
             LogLevel::All,

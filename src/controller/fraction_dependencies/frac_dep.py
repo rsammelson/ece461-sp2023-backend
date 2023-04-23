@@ -1,9 +1,11 @@
+'''Python script implementation of fraction dependencies metric.'''
+
 import os
 import json
 import sys
 
-
-def findDeps(repo_identifier):
+def find_deps(repo_identifier):
+    '''Finding dependencies in repo'''
     #check slashes
     #file = '$HOME/.cache/acme'
     file = os.getcwd()
@@ -28,23 +30,19 @@ def findDeps(repo_identifier):
     #print("Returning... ")
 
     if exist:
-        with open(file) as json_file:
+        with open(file, encoding="utf-8") as json_file:
             data = json.load(json_file)
-            if not("dependencies" in data.keys()):
+            if not "dependencies" in data.keys():
                 print("1")
                 return 0 # no dependencies
             count = len(data["dependencies"])
             print(count)
-            #print("111")
             return 0
-        print("David")
     else:
-        #print("error, no path")
         print("-1")
         return 0
         
-
-if findDeps(sys.argv[1]) == -1:
-    exit(1)
+if find_deps(sys.argv[1]) == -1:
+    sys.exit(1)
 else:
-    exit(0)
+    sys.exit(0)
