@@ -18,3 +18,13 @@ init-fake-submodules:
 
 copy-hooks:
 	cp hooks/* .git/hooks
+
+exports: 
+	export GITHUB_TOKEN=$(TOKEN)
+	export GITHUB_API_TOKEN=$(TOKEN)
+	export LOG_FILE=log
+	export LOG_LEVEL=2
+
+run: exports
+	./run build
+	./run <file_with_repo_url> > tmp_file.txt
