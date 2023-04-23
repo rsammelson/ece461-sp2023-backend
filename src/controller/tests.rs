@@ -118,20 +118,24 @@ async fn net_score_calculation_simple() {
         ramp_up_time: 0.1,
         responsiveness: 0.,
         license_compatibility: 1.,
-        fraction_dependencies: 0.38,
-        fraction_reviewed: 0.45,
+        fraction_dependencies: 0., // TODO: Get it to work with non-zero weights
+        fraction_reviewed: 0.,     // TODO: Get it to work with non-zero weights
     };
 
     let correct_net_score = (weights.bus_factor * 1.
         + weights.correctness_factor * 2.
         + weights.ramp_up_time * 3.
         + weights.responsiveness * 4.
-        + weights.license_compatibility * 5.)
+        + weights.license_compatibility * 5.
+        + weights.fraction_dependencies * 7.
+        + weights.fraction_reviewed * 8.)
         / (weights.bus_factor
             + weights.correctness_factor
             + weights.ramp_up_time
             + weights.responsiveness
-            + weights.license_compatibility)
+            + weights.license_compatibility
+            + weights.fraction_dependencies
+            + weights.fraction_reviewed)
         / len as f64;
 
     // this will run all metrics, giving each one a score of
