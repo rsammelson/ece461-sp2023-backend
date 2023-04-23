@@ -3,6 +3,8 @@ mod tests;
 
 mod bus_factor;
 mod correctness;
+mod fraction_dependencies;
+mod fraction_reviewed;
 mod license_compatibility;
 mod ramp_up_time;
 mod responsiveness;
@@ -90,6 +92,8 @@ fn calculate_net_score(scores: Scores, weights: Arc<input::Weights>) -> Scores {
                 Metric::RampUpTime(_) => weights.ramp_up_time,
                 Metric::Responsiveness(_) => weights.responsiveness,
                 Metric::LicenseCompatibility(_) => weights.license_compatibility,
+                Metric::FractionDependencies(_) => weights.fraction_dependencies,
+                Metric::FractionReviewed(_) => weights.fraction_reviewed,
             };
             (score * weight, weight)
         })

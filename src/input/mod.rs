@@ -8,6 +8,8 @@ pub struct Weights {
     pub ramp_up_time: f64,
     pub responsiveness: f64,
     pub license_compatibility: f64,
+    pub fraction_dependencies: f64,
+    pub fraction_reviewed: f64,
 }
 
 pub struct Urls {
@@ -31,6 +33,8 @@ impl Weights {
             ramp_up_time: 0.,
             responsiveness: 0.,
             license_compatibility: 0.,
+            fraction_dependencies: 0.,
+            fraction_reviewed: 0.,
         }
     }
 }
@@ -43,6 +47,8 @@ impl Default for Weights {
             ramp_up_time: 1.,
             responsiveness: 1.,
             license_compatibility: 1.,
+            fraction_dependencies: 1.,
+            fraction_reviewed: 1.,
         }
     }
 }
@@ -54,6 +60,12 @@ impl Display for Weights {
         writeln!(f, "RAMP_UP_WEIGHT: {}", self.ramp_up_time)?;
         writeln!(f, "RESPONSIVE_MAINTAINER_WEIGHT: {}", self.responsiveness)?;
         write!(f, "LICENSE_WEIGHT: {}", self.license_compatibility)?;
+        write!(
+            f,
+            "FRACTION_DEPENDENCY_WEIGHT: {}",
+            self.fraction_dependencies
+        )?;
+        write!(f, "FRACTION_REVIEWED_WEIGHT: {}", self.fraction_reviewed)?;
         Ok(())
     }
 }

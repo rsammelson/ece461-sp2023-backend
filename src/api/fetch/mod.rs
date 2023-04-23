@@ -1,9 +1,9 @@
 pub mod url_conversion;
 
 use crate::{log, log::LogLevel};
-
-use dirs;
+// use dirs;
 use git2::Repository;
+use std::env;
 use std::{error::Error, fmt::Display, path::PathBuf};
 use tokio::{fs, task};
 use url;
@@ -30,14 +30,20 @@ impl GithubRepositoryName {
 pub enum RepositoryCreationError {
     #[error("Error while getting repository: `{0}`")]
     RepoError(&'static str),
-    #[error("Error while getting repository: `{0}`")]
-    OtherError(&'static str),
+    // #[error("Error while getting repository: `{0}`")]
+    // OtherError(&'static str),
 }
 
-fn get_cache_dir() -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
-    Ok(dirs::cache_dir().ok_or(RepositoryCreationError::OtherError(
-        "Cannot locate home directory",
-    ))?)
+// CACHE PATH IS DEFINED HERE
+// fn get_cache_dir() -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
+//     Ok(dirs::cache_dir().ok_or(RepositoryCreationError::OtherError(
+//         "Cannot locate home directory",
+//     ))?)
+// }
+
+// Get the current working directory
+fn get_current_working_dir() -> std::io::Result<PathBuf> {
+    env::current_dir()
 }
 
 /// Given a `Url`,
@@ -55,7 +61,13 @@ pub async fn fetch_repo(
 
     let url = format!("https://github.com/{}/{}.git", repo.owner, repo.name);
 
-    let path = get_cache_dir()?.join("acme").join(&repo.owner);
+    //Find operating system
+    //let info = os_info::get();
+    //let op_sys = info.os_type();
+
+    //PATH SET HERE
+    //let path = get_cache_dir()?.join("acme").join(&repo.owner);
+    let path = get_current_working_dir()?.join("acme").join(&repo.owner);
     let repo_path = path.join(&repo.name);
 
     fs::create_dir_all(path).await?;

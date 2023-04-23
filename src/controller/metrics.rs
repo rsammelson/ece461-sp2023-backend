@@ -15,6 +15,8 @@ pub enum Metric {
     RampUpTime(ramp_up_time::RampUpTime),
     Responsiveness(responsiveness::Responsiveness),
     LicenseCompatibility(license_compatibility::LicenseCompatibility),
+    FractionDependencies(fraction_dependencies::FractionDependencies),
+    FractionReviewed(fraction_reviewed::FractionReviewed),
 }
 
 #[async_trait]
@@ -34,6 +36,8 @@ impl Scorer for Metric {
             RampUpTime(unit) => unit.score(repo, url).await,
             Responsiveness(unit) => unit.score(repo, url).await,
             LicenseCompatibility(unit) => unit.score(repo, url).await,
+            FractionDependencies(unit) => unit.score(repo, url).await,
+            FractionReviewed(unit) => unit.score(repo, url).await,
         }
     }
 }
@@ -46,6 +50,8 @@ impl Display for Metric {
             Metric::RampUpTime(_) => write!(f, "RAMP_UP_SCORE"),
             Metric::Responsiveness(_) => write!(f, "RESPONSIVE_MAINTAINER_SCORE"),
             Metric::LicenseCompatibility(_) => write!(f, "LICENSE_SCORE"),
+            Metric::FractionDependencies(_) => write!(f, "FRACTION_DEPENDENCIES_SCORE"),
+            Metric::FractionReviewed(_) => write!(f, "FRACTION_REVIEWED_SCORE"),
         }
     }
 }
@@ -60,6 +66,8 @@ impl Metrics {
             Metric::RampUpTime(ramp_up_time::RampUpTime()),
             Metric::Responsiveness(responsiveness::Responsiveness()),
             Metric::LicenseCompatibility(license_compatibility::LicenseCompatibility()),
+            Metric::FractionDependencies(fraction_dependencies::FractionDependencies()),
+            Metric::FractionReviewed(fraction_reviewed::FractionReviewed()),
         ])
     }
 }
