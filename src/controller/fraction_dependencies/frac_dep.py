@@ -41,7 +41,7 @@ def find_deps(repo_identifier):
     else:
         print("-1")
         return 0
-        
+
 if find_deps(sys.argv[1]) == -1:
     sys.exit(1)
 else:
