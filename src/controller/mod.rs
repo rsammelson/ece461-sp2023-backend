@@ -3,11 +3,11 @@ mod tests;
 
 mod bus_factor;
 mod correctness;
+mod fraction_dependencies;
+mod fraction_reviewed;
 mod license_compatibility;
 mod ramp_up_time;
 mod responsiveness;
-mod fraction_dependencies;
-mod fraction_reviewed;
 
 mod scores;
 pub use scores::Scores;

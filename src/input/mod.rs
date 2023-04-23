@@ -7,7 +7,7 @@ pub struct Weights {
     pub correctness_factor: f64,
     pub ramp_up_time: f64,
     pub responsiveness: f64,
-    pub license_compatibility: f64, 
+    pub license_compatibility: f64,
     pub fraction_dependencies: f64,
     pub fraction_reviewed: f64,
 }
@@ -60,7 +60,11 @@ impl Display for Weights {
         writeln!(f, "RAMP_UP_WEIGHT: {}", self.ramp_up_time)?;
         writeln!(f, "RESPONSIVE_MAINTAINER_WEIGHT: {}", self.responsiveness)?;
         write!(f, "LICENSE_WEIGHT: {}", self.license_compatibility)?;
-        write!(f, "FRACTION_DEPENDENCY_WEIGHT: {}", self.fraction_dependencies)?;
+        write!(
+            f,
+            "FRACTION_DEPENDENCY_WEIGHT: {}",
+            self.fraction_dependencies
+        )?;
         write!(f, "FRACTION_REVIEWED_WEIGHT: {}", self.fraction_reviewed)?;
         Ok(())
     }
