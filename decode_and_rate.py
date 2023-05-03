@@ -12,7 +12,11 @@ import string
 import datetime
 from urllib.parse import urlparse
 
+# ChatGPT was referenced to help develop 
+# parts of this code
+
 ###########################################
+# Checks if url is valid
 def is_valid_url(url):
     try:
         result = urlparse(url)
@@ -21,10 +25,11 @@ def is_valid_url(url):
         return False
 
 ###########################################
+# Compresses and zips folder
 def compress_folder(input_folder, output_zip):
     # Open the output ZIP file in write mode
     with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        # Walk through the input folder
+        # Step through input folder
         for root, dirs, files in os.walk(input_folder):
             for file in files:
                 # Get the file path relative to the input folder
@@ -33,37 +38,30 @@ def compress_folder(input_folder, output_zip):
                 zipf.write(os.path.join(root, file), arcname=rel_path)
 
 ###########################################
+# Zips a repo and converts it to base64 string
 def grab_content(repo_path):
-    """
-    Compress a GitHub repository at the specified path into a zip file,
-    and encode the zip file as a base64 string.
-    """
-    # Create a temporary file to hold the compressed repository
+
+    # Temporary zip folder to hold the compressed repo
     zip_path = "/tmp/repo.zip"
     
-    print(repo_path)
-
+    # Delete the .git file
     os.system("rm -rf {}".format(repo_path + "/.git"))
 
-    # Compress the repository into a zip file
-    #with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-       # for root, dirs, files in os.walk(repo_path):
-           # for file in files:
-               # file_path = os.path.join(root, file)
-               # zip_file.write(file_path, arcname=file)
-
+    # Compress and zip repo
     compress_folder(repo_path, zip_path)
 
-    # Encode the zip file as a base64 string
+    # Encode zip file as a base64 string
     with open(zip_path, "rb") as f:
         encoded_string = base64.b64encode(f.read()).decode("utf-8")
 
-    # Delete the temporary file
-    os.remove(zip_path) #HEREEEEEEEEEEEEEEEEE
+    # Delete the temp folder
+    os.remove(zip_path)
 
     return encoded_string
 
 #############################################
+# Takes a base64 encoded zip file, and decodes it
+# to grab and return the repo URL
 def decode_base64(base64_string):
 
     # Making sure acme directory is clear
@@ -71,8 +69,7 @@ def decode_base64(base64_string):
     shutil.rmtree(acme_dir)
     os.makedirs(acme_dir)
     
-    # Decode the base64 string
-    # Decode the base64 string and create a BytesIO object
+    # Decode the base64 string 
     decoded_data = base64.b64decode(base64_string)
     bytes_io = io.BytesIO(decoded_data)
 
@@ -87,7 +84,7 @@ def decode_base64(base64_string):
             # Create the directory if it doesn't exist
             if dirname and not os.path.exists(os.path.join("extracted_files", dirname)):
                 os.makedirs(os.path.join("extracted_files", dirname))
-            # Write the file to disk
+            # Write to file
             if filename:
                 # print(filename)
                 with zip_file.open(file_info) as file:
@@ -99,20 +96,20 @@ def decode_base64(base64_string):
     # Current path plus directory with repo
     path_ = cwd + '/extracted_files'
 
-    # Step into a directory
+    # Step into directory
     os.chdir(path_)
 
     # Get the list of directories in the current directory
     directories = os.listdir()
 
-    # Loop over the directories to find the one you want to step into
+    # Loop over the directories (should only be one)
     for directory in directories:
         # Check if the current item is a directory
         if os.path.isdir(directory):
-            # If it is, step into the directory
+            # Step into the directory
             os.chdir(directory)
             #print(directory)
-            break  # Stop looping once you've found the directory
+            break
         
     # Current path plus package.son file
     file = os.getcwd() + '/' + 'package.json'
@@ -120,13 +117,14 @@ def decode_base64(base64_string):
     #Checking package.json exits
     exist = os.path.isfile(file)
 
-    #For later
-    #name = ""
-    #version = ""
+    # Creating URL string
     url = ""
 
+    # Open package.json if exists
     if exist:
+        # Open file
         with open(file, encoding="utf-8") as json_file:
+            # Collect .json data
             data = json.load(json_file)
             if not "repository" in data.keys():
                 print("ERROR: NO URL") 
@@ -145,35 +143,42 @@ def decode_base64(base64_string):
     return url
 
 #############################################
+# "main" function of this .py file
+# Called by call_decode.py
+# Decodes and encodes base64 zips
+# Runs part 1 code
+# Sends outputs to API
 def decode(input_string, jsprogram):
-#need to grab name and version
 
     cwd = os.getcwd()
-
+    
+    # Assuming input is url 
     url = input_string
-
     url_given = True
 
+    # Assuming input is base64 content
     content = input_string
 
+    # Check if input_string is url or base64 content
     if not is_valid_url(input_string):
+        # Grab repo URL for part 1 code
         url = decode_base64(input_string)
         url_given = False
 
-    #Moving into ECE461-Project-ACMEIR.
+    #Moving into ECE461-Project-ACMEIR - part 1 codebase
     os.chdir(cwd + '/ECE461-Project-ACMEIR')
 
-    # Open a text file for writing
+    # Open a URL_FILE text file for part 1 code
     with open('URL_FILE', 'w') as file:
-        # Write some text to the file
         file.write(url)
 
-    # Target we want to run in Makefile
-    target = "runmain"
+    # Target to run in Makefile
+    #target = "runmain"
 
-    # Run make command with a target
-    result = subprocess.run(["bash", "runmain.sh", "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"], capture_output=True, text=True)
+    # Run bash file
+    result = subprocess.run(["bash", "runmain.sh", "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"], capture_output=True, text=True)
 
+    # Collecting part 1 code metric outputs
     metrics = {}
     file_contents = result.stdout
     metrics = json.loads(file_contents)
@@ -182,19 +187,22 @@ def decode(input_string, jsprogram):
 
     path_ = ""
 
-    # Get the list of directories in the current directory
+    # Get the list of directories (GITHUB USERNAMES)
     directories = os.listdir()
 
-    #LOOP INTO USERNAME DIRECTORY
+    #Loop into directory (GITHUB USERNAMES)
     for directory in directories:
         # Check if the current item is a directory
         if os.path.isdir(directory):
-            # If it is, step into the directory
+            # Step into the directory
             path_ = os.getcwd() + '/' + directory
             #print(path_)
             os.chdir(path_)
-
+            
+            # Get directories (REPO NAMES)
             directories2 = os.listdir()
+            
+            # Loop through REPO NAMES
             for directory2 in directories2:
                 
                 if os.path.isdir(directory2):
@@ -202,15 +210,16 @@ def decode(input_string, jsprogram):
                     path_2 = os.getcwd() + '/' + directory2
 
                     if url_given:
+                        # Grab base64 encoded content
                        content = grab_content(path_2)
-                       #content = compress_zip_and_base64(path_2)
 
                     os.chdir(path_2)
                     
                     break
 
-            break  # Stop looping once you've found the directory
+            break
 
+    # Check if package.json exists to grab data
     file = path_2 + '/package.json'
     exist = os.path.isfile(file)
 
@@ -223,7 +232,8 @@ def decode(input_string, jsprogram):
         print("ERROR: NO package.json")
 
     os.chdir(cwd + '/ECE461-Project-ACMEIR')
-
+    
+    # Remove repo clone created by part 1 code
     shutil.rmtree(path_)
 
     NAME = name
@@ -239,10 +249,10 @@ def decode(input_string, jsprogram):
 
     print(content)
 
-    # taken from https://www.geeksforgeeks.org/python-generate-random-string-of-given-length/
+    # Taken from https://www.geeksforgeeks.org/python-generate-random-string-of-given-length/
     id = str(''.join(random.choices(string.ascii_uppercase +
                              string.digits, k=20)))
-    # used https://stackoverflow.com/questions/2150739/iso-time-iso-8601-in-python for utc iso date
+    # Used https://stackoverflow.com/questions/2150739/iso-time-iso-8601-in-python for utc iso date
     date = datetime.datetime.utcnow().isoformat()
     date = date[0:date.index('.')]+'Z'
 
